@@ -22,7 +22,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.buttonUpload.setOnClickListener {
+        binding.fabAddQRCode.setOnClickListener {
             findNavController().navigate(R.id.action_Home_to_Upload)
         }
     }

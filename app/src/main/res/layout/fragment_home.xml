@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:showPaths="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.HomeFragment">
+    tools:context=".ui.fragments.HomeFragment"
+    app:layoutDescription="@xml/fab_home_scene">
 
     <TextView
         android:id="@+id/textview_home"
@@ -13,12 +16,48 @@
         android:layout_gravity="center"
         android:text="@string/hello_home_fragment" />
 
+    <View
+        android:id="@+id/view_overlap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/button_upload"
+        android:id="@+id/fab_add_QR_code"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_input_add"
-        android:contentDescription="@string/create_new" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        android:src="@android:drawable/ic_input_add"
+        app:fabCustomSize="48dp"
+        android:contentDescription="@string/upload_qr_code" />
+
+    <TextView
+        android:id="@+id/textview_fab_create_QR_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/upload_qr_code"
+        android:textColor="@color/white" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_create_QR_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:src="@android:drawable/ic_menu_edit"
+        app:fabCustomSize="48dp"
+        android:contentDescription="@string/create_qr_code" />
+
+    <TextView
+        android:id="@+id/textview_fab_upload_QR_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/create_qr_code"
+        android:textColor="@color/white" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_upload_QR_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:src="@android:drawable/ic_menu_gallery"
+        app:fabCustomSize="48dp"
+        android:contentDescription="@string/create_qr_code" />
+</androidx.constraintlayout.motion.widget.MotionLayout>

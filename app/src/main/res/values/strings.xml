@@ -7,4 +7,6 @@
     <string name="hello_home_fragment">Hello home fragment</string>
     <string name="hello_upload_fragment">Hello upload fragment</string>
     <string name="create_new">新規作成</string>
+    <string name="upload_qr_code">QRコードをアップロード</string>
+    <string name="create_qr_code">新規作成</string>
 </resources>

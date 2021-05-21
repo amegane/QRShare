@@ -41,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:src="@android:drawable/ic_menu_edit"
+        android:src="@android:drawable/ic_menu_gallery"
         app:fabCustomSize="48dp"
         android:contentDescription="@string/create_qr_code" />
 
@@ -57,7 +57,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:src="@android:drawable/ic_menu_gallery"
+        android:src="@android:drawable/ic_menu_edit"
         app:fabCustomSize="48dp"
         android:contentDescription="@string/create_qr_code" />
 </androidx.constraintlayout.motion.widget.MotionLayout>

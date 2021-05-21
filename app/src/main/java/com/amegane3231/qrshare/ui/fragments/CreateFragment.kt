@@ -6,15 +6,15 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableString
-import android.text.TextWatcher
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
+import android.view.*
 import android.widget.EditText
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.FragmentCreateBinding
 import com.amegane3231.qrshare.extentionFunction.isEditing
@@ -23,11 +23,19 @@ import com.amegane3231.qrshare.extentionFunction.removeHashTagSpans
 import com.amegane3231.qrshare.hashTagSpan.HashTagForegroundColorSpan
 import com.amegane3231.qrshare.hashTagSpan.HashTagUnderlineSpan
 import com.amegane3231.qrshare.interfaces.CustomTextWatcher
+import com.amegane3231.qrshare.viewmodels.CreateViewModel
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.receiveAsFlow
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 class CreateFragment : Fragment() {
     private lateinit var binding: FragmentCreateBinding
+    private val createViewModel: CreateViewModel by viewModels()
+    private var qrCode: Bitmap? = null
+    private var URL: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,18 +43,33 @@ class CreateFragment : Fragment() {
     ): View {
         binding = FragmentCreateBinding.inflate(inflater, container, false)
 
+        setHasOptionsMenu(true)
+
+        lifecycleScope.launchWhenCreated {
+            createViewModel.channel.receiveAsFlow().collect {
+                if(it.isSuccess) {
+                    Toast.makeText(requireContext(), getString(R.string.toast_finish_upload), Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
+                } else {
+                    Toast.makeText(requireContext(), getString(R.string.toast_fail_upload), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         binding.edittextInputURL.addTextChangedListener(object : CustomTextWatcher {
             override fun afterTextChanged(charSequence: Editable?) {
                 if (charSequence == null || charSequence.isEmpty()) return
                 val data = charSequence.toString()
                 if (!data.isURL()) {
-                    setError(binding.edittextInputURL)
+                    binding.edittextInputURL.error = getString(R.string.error_URL)
                     binding.textviewQRCode.isVisible = true
                     binding.imageviewQRCode.setImageBitmap(null)
                     return
                 }
+                URL = data
                 val qrCode = createQRCode(data)
                 qrCode?.let {
+                    this@CreateFragment.qrCode = it
                     binding.textviewQRCode.isVisible = false
                     binding.imageviewQRCode.setImageBitmap(it)
                 }
@@ -87,6 +110,36 @@ class CreateFragment : Fragment() {
         return binding.root
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_add_qr_code, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.action_submit  -> {
+                val client = OkHttpClient()
+                val request = Request.Builder().url(URL).build()
+                val call = client.newCall(request)
+                try {
+                    val response = call.execute()
+                    val responseCode = response.code()
+                    if (responseCode != 200) return false
+                } catch (e: Exception) {
+                    Log.e("Exception", e.toString())
+                    binding.edittextInputURL.error = getString(R.string.text_invalid_URL)
+                    return false
+                }
+                qrCode?.let {
+                    createViewModel.upload(it, "test.jpg")
+                } ?: run {
+                    Toast.makeText(requireContext(), getString(R.string.toast_prompt_qr_code), Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        return false
+    }
+
     private fun createQRCode(URL: String): Bitmap? {
         return try {
             val barcodeEncoder = BarcodeEncoder()
@@ -95,14 +148,8 @@ class CreateFragment : Fragment() {
             bitmap
         } catch (e: Exception) {
             Log.e("Exception", e.toString())
-            setError(binding.edittextInputURL)
+            binding.edittextInputURL.error = getString(R.string.error_URL)
             null
-        }
-    }
-
-    private fun setError(editText: EditText) {
-        when(editText) {
-            binding.edittextInputURL -> binding.edittextInputURL.error = getString(R.string.error_URL)
         }
     }
 

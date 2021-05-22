@@ -24,18 +24,27 @@ import com.amegane3231.qrshare.hashTagSpan.HashTagForegroundColorSpan
 import com.amegane3231.qrshare.hashTagSpan.HashTagUnderlineSpan
 import com.amegane3231.qrshare.interfaces.CustomTextWatcher
 import com.amegane3231.qrshare.viewmodels.CreateViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import okhttp3.*
+import java.io.IOException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class CreateFragment : Fragment() {
     private lateinit var binding: FragmentCreateBinding
+    private lateinit var auth: FirebaseAuth
     private val createViewModel: CreateViewModel by viewModels()
     private var qrCode: Bitmap? = null
     private var URL: String = ""
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -118,22 +127,36 @@ class CreateFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             R.id.action_submit  -> {
+                Log.d("URL", URL)
                 val client = OkHttpClient()
                 val request = Request.Builder().url(URL).build()
                 val call = client.newCall(request)
                 try {
-                    val response = call.execute()
-                    val responseCode = response.code()
-                    if (responseCode != 200) return false
+                    call.enqueue(object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            throw e
+                        }
+
+                        override fun onResponse(call: Call, response: Response) {
+                            val responseCode = response.code()
+                            if (responseCode != 200) {
+                                Toast.makeText(requireContext(), getString(R.string.toast_invalid_or_fail_access_URL), Toast.LENGTH_SHORT).show()
+                                return
+                            }
+                            val date = LocalDateTime.now()
+                            val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
+                            val fileName = auth.uid + dateTimeFormatter.format(date)
+                            qrCode?.let {
+                                createViewModel.upload(it, "$fileName.jpg")
+                            } ?: run {
+                                Toast.makeText(requireContext(), getString(R.string.toast_prompt_qr_code), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    })
                 } catch (e: Exception) {
                     Log.e("Exception", e.toString())
                     binding.edittextInputURL.error = getString(R.string.text_invalid_URL)
                     return false
-                }
-                qrCode?.let {
-                    createViewModel.upload(it, "test.jpg")
-                } ?: run {
-                    Toast.makeText(requireContext(), getString(R.string.toast_prompt_qr_code), Toast.LENGTH_SHORT).show()
                 }
             }
         }

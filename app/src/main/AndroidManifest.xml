@@ -19,6 +19,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.activities.LoginActivity"
+            android:label="@string/activity_login"
+            android:theme="@style/Theme.QRShare.NoActionBar">
+        </activity>
     </application>
 
 </manifest>

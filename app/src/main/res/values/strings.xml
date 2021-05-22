@@ -21,4 +21,7 @@
     <string name="toast_fail_upload">アップロードに失敗しました。時間をおいて再送信してください</string>
     <string name="text_invalid_URL">無効なURLです</string>
     <string name="toast_prompt_qr_code">QRコードを生成してください</string>
+    <string name="text_introduce">QR Shareへようこそ！</string>
+    <string name="activity_login">Login</string>
+    <string name="web_client_id">496172441501-u6artlcujs1vn1i28hqlcvjffi175so3.apps.googleusercontent.com</string>
 </resources>

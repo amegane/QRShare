@@ -25,4 +25,6 @@
     <string name="activity_login">Login</string>
     <string name="web_client_id">496172441501-u6artlcujs1vn1i28hqlcvjffi175so3.apps.googleusercontent.com</string>
     <string name="toast_invalid_or_fail_access_URL">URLが無効かページにアクセスできません</string>
+    <string name="toast_not_found_app">対応アプリが見つかりませんでした</string>
+    <string name="toast_fail_decode_qr_code">URLを取得できませんでした</string>
 </resources>

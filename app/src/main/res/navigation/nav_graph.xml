@@ -13,29 +13,27 @@
 
         <action
             android:id="@+id/action_Home_to_Upload"
-            app:destination="@id/UploadFragment" />
-        <action
-            android:id="@+id/action_Home_to_Create"
-            app:destination="@+id/CreateFragment" />
+            app:destination="@+id/UploadFragment" />
     </fragment>
     <fragment
         android:id="@+id/UploadFragment"
         android:name="com.amegane3231.qrshare.ui.fragments.UploadFragment"
-        android:label="@string/upload_fragment_label"
+        android:label="@string/create_qr_code"
         tools:layout="@layout/fragment_upload">
 
         <action
             android:id="@+id/action_Upload_to_Home"
-            app:destination="@id/HomeFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/CreateFragment"
-        android:name="com.amegane3231.qrshare.ui.fragments.CreateFragment"
-        android:label="@string/create_qr_code"
-        tools:layout="@layout/fragment_create">
-
-        <action
-            android:id="@+id/action_Create_to_Home"
             app:destination="@+id/HomeFragment" />
+
+        <argument
+            android:name="imageArg"
+            app:argType="android.graphics.Bitmap"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+        <argument
+            android:name="urlArg"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 </navigation>

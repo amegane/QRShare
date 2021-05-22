@@ -14,7 +14,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
-class CreateViewModel : ViewModel() {
+class UploadViewModel : ViewModel() {
     private val _channel = Channel<Result<Int>>(Channel.UNLIMITED)
     val channel: ReceiveChannel<Result<Int>> get() = _channel
     private val storage: FirebaseStorage = Firebase.storage

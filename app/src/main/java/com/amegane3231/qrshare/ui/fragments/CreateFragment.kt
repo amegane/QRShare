@@ -8,7 +8,6 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.util.Log
 import android.view.*
-import android.widget.EditText
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -16,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.amegane3231.qrshare.R
+import com.amegane3231.qrshare.data.QRCode
 import com.amegane3231.qrshare.databinding.FragmentCreateBinding
 import com.amegane3231.qrshare.extentionFunction.isEditing
 import com.amegane3231.qrshare.extentionFunction.isURL
@@ -38,7 +38,7 @@ class CreateFragment : Fragment() {
     private lateinit var binding: FragmentCreateBinding
     private lateinit var auth: FirebaseAuth
     private val createViewModel: CreateViewModel by viewModels()
-    private var qrCode: Bitmap? = null
+    private var qrCodeImage: Bitmap? = null
     private var URL: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,7 +78,7 @@ class CreateFragment : Fragment() {
                 URL = data
                 val qrCode = createQRCode(data)
                 qrCode?.let {
-                    this@CreateFragment.qrCode = it
+                    this@CreateFragment.qrCodeImage = it
                     binding.textviewQRCode.isVisible = false
                     binding.imageviewQRCode.setImageBitmap(it)
                 }
@@ -146,8 +146,9 @@ class CreateFragment : Fragment() {
                             val date = LocalDateTime.now()
                             val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
                             val fileName = auth.uid + dateTimeFormatter.format(date)
-                            qrCode?.let {
-                                createViewModel.upload(it, "$fileName.jpg")
+                            qrCodeImage?.let {
+                                val qrCode = QRCode(it, "$fileName.jpg")
+                                createViewModel.upload(qrCode, auth.uid!!, binding.edittextInputTag.text.split(" "))
                             } ?: run {
                                 Toast.makeText(requireContext(), getString(R.string.toast_prompt_qr_code), Toast.LENGTH_SHORT).show()
                             }

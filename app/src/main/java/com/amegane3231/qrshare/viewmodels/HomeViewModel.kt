@@ -37,7 +37,6 @@ class HomeViewModel : ViewModel() {
                 .addOnSuccessListener { (items, prefixes, pageToken) ->
                     _storageList.postValue(items)
                 }.addOnFailureListener {
-                    // Uh-oh, an error occurred.
                     Log.e("Exception", it.toString())
                 }
         }

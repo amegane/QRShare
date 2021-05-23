@@ -67,6 +67,12 @@ class UploadFragment : Fragment() {
             binding.edittextInputURL.setText(it)
         }
 
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         lifecycleScope.launchWhenCreated {
             uploadViewModel.channel.receiveAsFlow().collect {
                 if (it.isSuccess) {
@@ -143,8 +149,6 @@ class UploadFragment : Fragment() {
                 }
             }
         })
-
-        return binding.root
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

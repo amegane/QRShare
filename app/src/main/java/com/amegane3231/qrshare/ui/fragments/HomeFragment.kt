@@ -1,6 +1,5 @@
 package com.amegane3231.qrshare.ui.fragments
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
@@ -46,7 +45,11 @@ class HomeFragment : Fragment() {
                         findNavController().navigate(action)
                     } catch (e: Exception) {
                         Log.e("Exception", e.toString())
-                        Toast.makeText(requireContext(), getString(R.string.toast_fail_decode_qr_code), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.toast_fail_decode_qr_code),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -60,7 +63,6 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
-    @SuppressLint("QueryPermissionsNeeded")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.fabCreateQRCode.setOnClickListener {

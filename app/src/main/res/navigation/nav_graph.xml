@@ -18,7 +18,7 @@
     <fragment
         android:id="@+id/UploadFragment"
         android:name="com.amegane3231.qrshare.ui.fragments.UploadFragment"
-        android:label="@string/create_qr_code"
+        android:label="@string/upload_fragment_label"
         tools:layout="@layout/fragment_upload">
 
         <action

@@ -41,7 +41,7 @@ class UploadFragment : Fragment() {
     private val args: UploadFragmentArgs by navArgs()
     private val uploadViewModel: UploadViewModel by viewModels()
     private var qrCodeImage: Bitmap? = null
-    private var URL: String = ""
+    private var url: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +57,6 @@ class UploadFragment : Fragment() {
         setHasOptionsMenu(true)
 
         val selectedQRCode = args.imageArg
-        Log.d("image", args.toString())
         selectedQRCode?.let {
             binding.textviewQRCode.isVisible = false
             binding.imageviewQRCode.setImageBitmap(it)
@@ -70,11 +69,19 @@ class UploadFragment : Fragment() {
 
         lifecycleScope.launchWhenCreated {
             uploadViewModel.channel.receiveAsFlow().collect {
-                if(it.isSuccess) {
-                    Toast.makeText(requireContext(), getString(R.string.toast_finish_upload), Toast.LENGTH_SHORT).show()
+                if (it.isSuccess) {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.toast_finish_upload),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     findNavController().popBackStack()
                 } else {
-                    Toast.makeText(requireContext(), getString(R.string.toast_fail_upload), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.toast_fail_upload),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -89,7 +96,7 @@ class UploadFragment : Fragment() {
                     binding.imageviewQRCode.setImageBitmap(null)
                     return
                 }
-                URL = data
+                url = data
                 val qrCode = createQRCode(data)
                 qrCode?.let {
                     this@UploadFragment.qrCodeImage = it
@@ -108,16 +115,23 @@ class UploadFragment : Fragment() {
                 spannable.removeHashTagSpans()
 
                 val matcher = PATTERN.toRegex().toPattern().matcher(charSequence)
-                while(matcher.find()) {
+                while (matcher.find()) {
                     if (matcher.groupCount() != 2) continue
                     val content = charSequence.subSequence(matcher.start(2), matcher.end(2))
 
                     val start = matcher.start(1)
                     val end = matcher.end(1)
-                    if (content.length != content.toString().codePointCount(0, content.length)) continue
+                    if (content.length != content.toString()
+                            .codePointCount(0, content.length)
+                    ) continue
 
-                    spannable.setSpan(HashTagUnderlineSpan(), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                    HashTagForegroundColorSpan(Color.BLACK).run {
+                    spannable.setSpan(
+                        HashTagUnderlineSpan(),
+                        start,
+                        end,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    HashTagForegroundColorSpan(Color.BLUE).run {
                         spannable.setSpan(this, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                     }
 
@@ -139,11 +153,10 @@ class UploadFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
-            R.id.action_submit  -> {
-                Log.d("URL", URL)
+        when (item.itemId) {
+            R.id.action_submit -> {
                 val client = OkHttpClient()
-                val request = Request.Builder().url(URL).build()
+                val request = Request.Builder().url(url).build()
                 val call = client.newCall(request)
                 try {
                     call.enqueue(object : Callback {
@@ -154,7 +167,11 @@ class UploadFragment : Fragment() {
                         override fun onResponse(call: Call, response: Response) {
                             val responseCode = response.code()
                             if (responseCode != 200) {
-                                Toast.makeText(requireContext(), getString(R.string.toast_invalid_or_fail_access_URL), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.toast_invalid_or_fail_access_URL),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 return
                             }
                             val date = LocalDateTime.now()
@@ -162,9 +179,17 @@ class UploadFragment : Fragment() {
                             val fileName = auth.uid + dateTimeFormatter.format(date)
                             qrCodeImage?.let {
                                 val qrCode = QRCode(it, "$fileName.jpg")
-                                uploadViewModel.upload(qrCode, auth.uid!!, binding.edittextInputTag.text.split(" "))
+                                uploadViewModel.upload(
+                                    qrCode,
+                                    auth.uid!!,
+                                    binding.edittextInputTag.text.split(" ")
+                                )
                             } ?: run {
-                                Toast.makeText(requireContext(), getString(R.string.toast_prompt_qr_code), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    requireContext(),
+                                    getString(R.string.toast_prompt_qr_code),
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     })

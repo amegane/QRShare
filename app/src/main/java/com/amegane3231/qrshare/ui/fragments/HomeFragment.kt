@@ -21,10 +21,15 @@ import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.FragmentHomeBinding
 import com.amegane3231.qrshare.recyclerView.HomeRecyclerViewAdapter
 import com.amegane3231.qrshare.viewmodels.HomeViewModel
+import com.google.firebase.storage.StorageReference
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
@@ -67,12 +72,33 @@ class HomeFragment : Fragment() {
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-        homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
-            binding.viewHome.adapter = HomeRecyclerViewAdapter(
-                requireContext(),
-                it
-            )
+        val recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
+        recyclerViewAdapter.setOnItemClickListener(object :
+            HomeRecyclerViewAdapter.OnItemClickListener {
+            override fun onClick(
+                view: View,
+                position: Int,
+                bitmap: Bitmap,
+                storageRef: StorageReference
+            ) {
+                val imageName = storageRef.name
+                val imageUid = imageName.dropLast(COUNT_TO_DELETE_DATE_AND_FILE_EXTENSION)
+                homeViewModel.getTags(imageUid, imageName)
+                homeViewModel.flow.onEach {
+                    if (it.isNotEmpty()) {
+                        val action = HomeFragmentDirections.actionHomeToDetail(bitmap, "", it[0])
+                        findNavController().navigate(action)
+                    } else {
+                        Log.e("ERROR", "List is empty")
+                    }
+                }.launchIn(CoroutineScope(Dispatchers.Main))
+            }
         })
+
+        homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
+            recyclerViewAdapter.update(it)
+        })
+        binding.viewHome.adapter = recyclerViewAdapter
         binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2)
 
         return binding.root
@@ -110,5 +136,9 @@ class HomeFragment : Fragment() {
         val bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor)
         openFileDescriptor?.close()
         return bitmap
+    }
+
+    companion object {
+        private const val COUNT_TO_DELETE_DATE_AND_FILE_EXTENSION = 19
     }
 }

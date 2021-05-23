@@ -3,6 +3,7 @@
     <string name="action_settings">設定</string>
     <string name="home_fragment_label">ホーム</string>
     <string name="upload_fragment_label">アップロード</string>
+    <string name="detail_fragment_label">詳細</string>
     <string name="fab_create_new">新規作成</string>
     <string name="fab_upload_qr_code">QRコードをアップロード</string>
     <string name="text_url">URL</string>

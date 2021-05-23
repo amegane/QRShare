@@ -21,15 +21,10 @@ import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.FragmentHomeBinding
 import com.amegane3231.qrshare.recyclerView.HomeRecyclerViewAdapter
 import com.amegane3231.qrshare.viewmodels.HomeViewModel
-import com.google.firebase.storage.StorageReference
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
@@ -75,23 +70,10 @@ class HomeFragment : Fragment() {
         val recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
         recyclerViewAdapter.setOnItemClickListener(object :
             HomeRecyclerViewAdapter.OnItemClickListener {
-            override fun onClick(
-                view: View,
-                position: Int,
-                bitmap: Bitmap,
-                storageRef: StorageReference
-            ) {
-                val imageName = storageRef.name
+            override fun onClick(view: View, position: Int, path: String, imageName: String) {
                 val imageUid = imageName.dropLast(COUNT_TO_DELETE_DATE_AND_FILE_EXTENSION)
-                homeViewModel.getTags(imageUid, imageName)
-                homeViewModel.flow.onEach {
-                    if (it.isNotEmpty()) {
-                        val action = HomeFragmentDirections.actionHomeToDetail(bitmap, it[1], it[0])
-                        findNavController().navigate(action)
-                    } else {
-                        Log.e("ERROR", "List is empty")
-                    }
-                }.launchIn(CoroutineScope(Dispatchers.Main))
+                val action = HomeFragmentDirections.actionHomeToDetail(path, imageUid, imageName)
+                findNavController().navigate(action)
             }
         })
 

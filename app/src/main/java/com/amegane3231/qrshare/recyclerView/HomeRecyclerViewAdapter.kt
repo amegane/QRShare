@@ -1,8 +1,6 @@
 package com.amegane3231.qrshare.recyclerView
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,10 +10,6 @@ import com.bumptech.glide.Glide
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
-import com.google.zxing.BinaryBitmap
-import com.google.zxing.RGBLuminanceSource
-import com.google.zxing.common.HybridBinarizer
-import com.google.zxing.qrcode.QRCodeReader
 
 class HomeRecyclerViewAdapter(
     private val context: Context,
@@ -35,19 +29,19 @@ class HomeRecyclerViewAdapter(
         Glide.with(context).load(storageRef).into(imageView)
 
         holder.imageView.setOnClickListener {
-            val bitmap = (imageView.drawable as BitmapDrawable).bitmap
-            listener.onClick(it, position, bitmap, item)
+            listener.onClick(holder.itemView, position, item.path, item.name)
         }
     }
 
     override fun getItemCount(): Int = storageRefList.size
 
-    inner class HomeRecyclerViewHolder(binding: ItemHomeBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class HomeRecyclerViewHolder(binding: ItemHomeBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         val imageView = binding.image
     }
 
     interface OnItemClickListener {
-        fun onClick(view: View, position: Int, bitmap: Bitmap, storageRef: StorageReference)
+        fun onClick(view: View, position: Int, path: String, imageName: String)
     }
 
     fun setOnItemClickListener(listener: OnItemClickListener) {

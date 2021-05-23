@@ -10,6 +10,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.ActivityMainBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.gu.toolargetool.TooLargeTool
 
 class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -20,6 +21,8 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        TooLargeTool.startLogging(application)
 
         setSupportActionBar(binding.toolbar)
 

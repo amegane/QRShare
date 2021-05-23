@@ -25,6 +25,7 @@ class UploadViewModel : ViewModel() {
         val fileData = hashMapOf(
             "uid" to uid,
             "name" to qrCode.name,
+            "url" to qrCode.url,
             "tags" to tags
         )
 

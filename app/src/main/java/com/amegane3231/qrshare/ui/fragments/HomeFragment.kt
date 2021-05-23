@@ -86,7 +86,7 @@ class HomeFragment : Fragment() {
                 homeViewModel.getTags(imageUid, imageName)
                 homeViewModel.flow.onEach {
                     if (it.isNotEmpty()) {
-                        val action = HomeFragmentDirections.actionHomeToDetail(bitmap, "", it[0])
+                        val action = HomeFragmentDirections.actionHomeToDetail(bitmap, it[1], it[0])
                         findNavController().navigate(action)
                     } else {
                         Log.e("ERROR", "List is empty")
@@ -100,12 +100,6 @@ class HomeFragment : Fragment() {
         })
         binding.viewHome.adapter = recyclerViewAdapter
         binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2)
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
         homeViewModel.listAllPaginated(null)
 
@@ -127,6 +121,8 @@ class HomeFragment : Fragment() {
                 ).show()
             }
         }
+
+        return binding.root
     }
 
     private fun getBitmap(uri: Uri): Bitmap {

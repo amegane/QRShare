@@ -59,6 +59,7 @@ class UploadFragment : Fragment() {
         val selectedQRCode = args.imageArg
         selectedQRCode?.let {
             binding.textviewQRCode.isVisible = false
+            qrCodeImage = it
             binding.imageviewQRCode.setImageBitmap(it)
         }
 
@@ -183,7 +184,7 @@ class UploadFragment : Fragment() {
                             val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
                             val fileName = auth.uid + dateTimeFormatter.format(date)
                             qrCodeImage?.let {
-                                val qrCode = QRCode(it, "$fileName.jpg")
+                                val qrCode = QRCode(it, "$fileName.jpg", url)
                                 uploadViewModel.upload(
                                     qrCode,
                                     auth.uid!!,

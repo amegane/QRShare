@@ -55,33 +55,16 @@ class HomeViewModel : ViewModel() {
         dataBase.collection(uid).whereIn("name", mutableListOf(fileName)).get()
             .addOnSuccessListener { result ->
                 val data = result.documents[0].data
-                val tag = data?.getValue("tags") as ArrayList<String>
-                Log.d("Tags", tag.toString())
+                val list = data?.getValue("tags") as ArrayList<String>
+                val url = data.getValue("url") as String
+                list.add(url)
+                Log.d("list", list.toString())
                 viewModelScope.launch {
-                    _flow.emit(tag)
+                    _flow.emit(list)
                 }
             }
             .addOnFailureListener {
                 Log.e("Exception", it.toString())
             }
     }
-
-//    fun getTags (uid: String, fileName: String) {
-//        viewModelScope.launch {
-//            dataBase.collection(uid).whereIn("name", mutableListOf(fileName)).get()
-//                .addOnSuccessListener { result ->
-//                    val list = mutableListOf<String>()
-//                    for(document in result) {
-//                        val data = document.data
-//                        val tag = data.getValue("tags")
-//                        list.add(tag.toString())
-//                    }
-//                    Log.d("Tags", list.toString())
-//                    _tagsList.postValue(list)
-//                }
-//                .addOnFailureListener {
-//                    Log.e("Exception", it.toString())
-//                }
-//        }
-//    }
 }

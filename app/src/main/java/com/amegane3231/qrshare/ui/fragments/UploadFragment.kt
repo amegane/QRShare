@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.data.QRCode
+import com.amegane3231.qrshare.data.StateURL
 import com.amegane3231.qrshare.databinding.FragmentUploadBinding
 import com.amegane3231.qrshare.extentionFunction.isEditing
 import com.amegane3231.qrshare.extentionFunction.isURL
@@ -160,49 +161,68 @@ class UploadFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_submit -> {
+                var stateURL: StateURL = StateURL.invalidURL
                 url = binding.edittextInputURL.text.toString()
-                val client = OkHttpClient()
-                val request = Request.Builder().url(url).build()
-                val call = client.newCall(request)
+                if (!url.isURL()) {
+                    binding.edittextInputURL.error = getString(R.string.error_URL)
+                    binding.textviewQRCode.isVisible = true
+                    binding.imageviewQRCode.setImageBitmap(null)
+                    return false
+                }
                 try {
+                    val client = OkHttpClient()
+                    val request = Request.Builder().url(url).build()
+                    val call = client.newCall(request)
                     call.enqueue(object : Callback {
                         override fun onFailure(call: Call, e: IOException) {
-                            throw e
+                            
                         }
 
                         override fun onResponse(call: Call, response: Response) {
                             val responseCode = response.code()
                             if (responseCode != 200) {
-                                Toast.makeText(
-                                    requireContext(),
-                                    getString(R.string.toast_invalid_or_fail_access_URL),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                stateURL = StateURL.failureConnectURL
                                 return
                             }
+                            stateURL = StateURL.successConnectURL
                             val date = LocalDateTime.now()
                             val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
                             val fileName = auth.uid + dateTimeFormatter.format(date)
-                            qrCodeImage?.let {
+                            qrCodeImage?.also {
                                 val qrCode = QRCode(it, "$fileName.jpg", url)
                                 uploadViewModel.upload(
                                     qrCode,
                                     auth.uid!!,
                                     binding.edittextInputTag.text.split(" ")
                                 )
-                            } ?: run {
-                                Toast.makeText(
-                                    requireContext(),
-                                    getString(R.string.toast_prompt_qr_code),
-                                    Toast.LENGTH_SHORT
-                                ).show()
                             }
+
                         }
                     })
                 } catch (e: Exception) {
                     Log.e("Exception", e.toString())
                     binding.edittextInputURL.error = getString(R.string.text_invalid_URL)
+                    stateURL = StateURL.invalidURL
                     return false
+                }
+                when (stateURL) {
+                    StateURL.invalidURL -> {
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.toast_invalid_or_fail_access_URL),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    StateURL.failureConnectURL -> {
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.toast_invalid_or_fail_access_URL),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    StateURL.successConnectURL -> {
+
+                    }
                 }
             }
         }

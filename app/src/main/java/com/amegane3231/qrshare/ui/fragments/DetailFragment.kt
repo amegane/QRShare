@@ -9,8 +9,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.amegane3231.qrshare.databinding.FragmentDetailBinding
+import com.amegane3231.qrshare.recyclerView.FlexboxListAdapter
 import com.amegane3231.qrshare.viewmodels.DetailViewModel
 import com.bumptech.glide.Glide
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 
@@ -33,14 +36,25 @@ class DetailFragment : Fragment() {
         val selectedQRCodeName = args.imageNameArg
         detailViewModel.getTags(selectedQRCodeUid, selectedQRCodeName)
 
+        val adapter = FlexboxListAdapter()
+
         detailViewModel.url.observe(viewLifecycleOwner, Observer {
             binding.textviewURL.text = it
         })
 
         detailViewModel.tagList.observe(viewLifecycleOwner, Observer {
-            binding.textviewTag.text = it.joinToString(", ")
+            adapter.update(it)
         })
 
+        binding.viewTag.adapter = adapter
+        val layoutManager = FlexboxLayoutManager(requireContext())
+        layoutManager.flexWrap = FlexWrap.WRAP
+        binding.viewTag.layoutManager = layoutManager
+
         return binding.root
+    }
+
+    companion object {
+        private const val PATTERN = "(?:^|\\s)(#([^\\s]+))[^\\s]?"
     }
 }

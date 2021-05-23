@@ -159,6 +159,7 @@ class UploadFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_submit -> {
+                url = binding.edittextInputURL.text.toString()
                 val client = OkHttpClient()
                 val request = Request.Builder().url(url).build()
                 val call = client.newCall(request)

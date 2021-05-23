@@ -78,7 +78,7 @@ class HomeFragment : Fragment() {
         })
 
         homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
-            recyclerViewAdapter.update(it)
+            recyclerViewAdapter.update(it.reversed())
         })
         binding.viewHome.adapter = recyclerViewAdapter
         binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2)

@@ -12,11 +12,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.FragmentHomeBinding
 import com.amegane3231.qrshare.recyclerView.HomeRecyclerViewAdapter
@@ -60,6 +63,8 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+    private var nowLoading = false
+    private lateinit var recyclerViewAdapter: HomeRecyclerViewAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,7 +72,9 @@ class HomeFragment : Fragment() {
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-        val recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
+        homeViewModel.initialize()
+
+        recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
         recyclerViewAdapter.setOnItemClickListener(object :
             HomeRecyclerViewAdapter.OnItemClickListener {
             override fun onClick(view: View, position: Int, path: String, imageName: String) {
@@ -78,10 +85,14 @@ class HomeFragment : Fragment() {
         })
 
         homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
-            recyclerViewAdapter.update(it.reversed())
+            recyclerViewAdapter.add(it)
+            binding.progressBar.isVisible = false
+            nowLoading = false
         })
+
         binding.viewHome.adapter = recyclerViewAdapter
         binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.viewHome.addOnScrollListener(InfiniteScrollListener())
 
         homeViewModel.listAllPaginated(null)
 
@@ -114,6 +125,25 @@ class HomeFragment : Fragment() {
         val bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor)
         openFileDescriptor?.close()
         return bitmap
+    }
+
+    inner class InfiniteScrollListener : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            if (nowLoading) return
+            val itemCount = binding.viewHome.adapter?.itemCount ?: -1
+            val childCount = binding.viewHome.childCount
+            val manager = binding.viewHome.layoutManager as LinearLayoutManager
+            val firstPosition = manager.findFirstVisibleItemPosition()
+
+            Log.d("itemCount", itemCount.toString())
+
+            if (itemCount == childCount + firstPosition) {
+                nowLoading = true
+                binding.progressBar.isVisible = true
+                homeViewModel.listAllPaginated(null)
+            }
+        }
     }
 
     companion object {

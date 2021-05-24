@@ -48,9 +48,8 @@ class HomeRecyclerViewAdapter(
         this.listener = listener
     }
 
-    fun update(list: List<StorageReference>) {
-        storageRefList.removeAll(storageRefList)
-        storageRefList.addAll(list)
+    fun add(list: List<StorageReference>) {
+        storageRefList.addAll(0, list)
         notifyDataSetChanged()
     }
 }

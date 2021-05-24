@@ -21,8 +21,14 @@ class HomeViewModel : ViewModel() {
     }
     val storageList: LiveData<List<StorageReference>> get() = _storageList
     private var pageToken: String? = null
+    private var isTokenNullable = true
 
     init {
+        _storageList.value = listOf()
+    }
+
+    fun initialize() {
+        isTokenNullable = true
         _storageList.value = listOf()
     }
 
@@ -31,14 +37,18 @@ class HomeViewModel : ViewModel() {
             listRef.list(COUNT_RESULTS, pageToken)
         } else if (this.pageToken != null) {
             listRef.list(COUNT_RESULTS, this.pageToken!!)
-        } else {
+        } else if (isTokenNullable) {
+            isTokenNullable = false
             listRef.list(COUNT_RESULTS)
+        } else {
+            return
         }
 
         viewModelScope.launch {
             listPageTask
                 .addOnSuccessListener { (items, prefixes, pageToken) ->
                     this@HomeViewModel.pageToken = pageToken
+                    Log.d("pageToken", pageToken.toString())
                     _storageList.postValue(items)
                 }.addOnFailureListener {
                     Log.e("Exception", it.toString())
@@ -47,6 +57,6 @@ class HomeViewModel : ViewModel() {
     }
 
     companion object {
-        private const val COUNT_RESULTS = 20
+        private const val COUNT_RESULTS = 10
     }
 }

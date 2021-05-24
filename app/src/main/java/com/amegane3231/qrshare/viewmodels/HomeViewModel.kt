@@ -20,7 +20,7 @@ class HomeViewModel : ViewModel() {
         MutableLiveData<List<StorageReference>>()
     }
     val storageList: LiveData<List<StorageReference>> get() = _storageList
-
+    private var pageToken: String? = null
 
     init {
         _storageList.value = listOf()
@@ -28,18 +28,25 @@ class HomeViewModel : ViewModel() {
 
     fun listAllPaginated(pageToken: String?) {
         val listPageTask = if (pageToken != null) {
-            listRef.list(100, pageToken)
+            listRef.list(COUNT_RESULTS, pageToken)
+        } else if (this.pageToken != null) {
+            listRef.list(COUNT_RESULTS, this.pageToken!!)
         } else {
-            listRef.list(100)
+            listRef.list(COUNT_RESULTS)
         }
 
         viewModelScope.launch {
             listPageTask
                 .addOnSuccessListener { (items, prefixes, pageToken) ->
+                    this@HomeViewModel.pageToken = pageToken
                     _storageList.postValue(items)
                 }.addOnFailureListener {
                     Log.e("Exception", it.toString())
                 }
         }
+    }
+
+    companion object {
+        private const val COUNT_RESULTS = 20
     }
 }

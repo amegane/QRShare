@@ -11,7 +11,7 @@
     <string name="hint_input_URL">URLを入力</string>
     <string name="error_URL">URLを入力してください</string>
     <string name="text_hint_image_QRCode">URLを入力するとここにQRコードが表示されます</string>
-    <string name="text_tag">タグ</string>
+    <string name="text_tag">ハッシュタグ</string>
     <string name="text_button_create">作成</string>
     <string name="menu_submit">送信</string>
     <string name="toast_finish_upload">アップロードが完了しました</string>

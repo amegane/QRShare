@@ -24,4 +24,6 @@
     <string name="toast_invalid_or_fail_access_URL">URLが無効かページにアクセスできません</string>
     <string name="toast_not_found_app">対応アプリが見つかりませんでした</string>
     <string name="toast_fail_decode_qr_code">URLを取得できませんでした</string>
+    <string name="button_save_qr_code">QRコードを保存</string>
+    <string name="toast_save">保存しました</string>
 </resources>

@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.amegane3231.qrshare">
 
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.OPEN_DOCUMENT" />
@@ -29,8 +33,7 @@
         <activity
             android:name=".ui.activities.LoginActivity"
             android:label="@string/activity_login"
-            android:theme="@style/Theme.QRShare.NoActionBar">
-        </activity>
+            android:theme="@style/Theme.QRShare.NoActionBar" />
     </application>
 
 </manifest>

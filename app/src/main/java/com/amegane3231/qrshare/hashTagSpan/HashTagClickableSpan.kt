@@ -5,7 +5,8 @@ import android.view.View
 
 class HashTagClickableSpan(
     private val callback: (content: CharSequence) -> Unit,
-    private val content: CharSequence) : ClickableSpan(), HashTagSpan {
+    private val content: CharSequence
+) : ClickableSpan(), HashTagSpan {
     override fun onClick(widget: View) {
         callback(content)
     }

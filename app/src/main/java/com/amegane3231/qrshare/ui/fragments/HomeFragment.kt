@@ -64,7 +64,6 @@ class HomeFragment : Fragment() {
             }
         }
     private var nowLoading = false
-    private lateinit var recyclerViewAdapter: HomeRecyclerViewAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,7 +73,7 @@ class HomeFragment : Fragment() {
 
         homeViewModel.initialize()
 
-        recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
+        val recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
         recyclerViewAdapter.setOnItemClickListener(object :
             HomeRecyclerViewAdapter.OnItemClickListener {
             override fun onClick(view: View, position: Int, path: String, imageName: String) {
@@ -84,15 +83,19 @@ class HomeFragment : Fragment() {
             }
         })
 
+        binding.viewHome.adapter = recyclerViewAdapter
+        binding.viewHome.setHasFixedSize(true)
+        binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2).apply {
+            orientation = GridLayoutManager.VERTICAL
+            recycleChildrenOnDetach = true
+        }
+        binding.viewHome.addOnScrollListener(InfiniteScrollListener())
+
         homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
             recyclerViewAdapter.add(it)
             binding.progressBar.isVisible = false
             nowLoading = false
         })
-
-        binding.viewHome.adapter = recyclerViewAdapter
-        binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2)
-        binding.viewHome.addOnScrollListener(InfiniteScrollListener())
 
         homeViewModel.listAllPaginated(null)
 
@@ -130,19 +133,23 @@ class HomeFragment : Fragment() {
     inner class InfiniteScrollListener : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            if (nowLoading) return
-            val itemCount = binding.viewHome.adapter?.itemCount ?: -1
-            val childCount = binding.viewHome.childCount
-            val manager = binding.viewHome.layoutManager as LinearLayoutManager
-            val firstPosition = manager.findFirstVisibleItemPosition()
-
-            Log.d("itemCount", itemCount.toString())
-
-            if (itemCount == childCount + firstPosition) {
-                nowLoading = true
-                binding.progressBar.isVisible = true
-                homeViewModel.listAllPaginated(null)
+            if (!recyclerView.canScrollVertically(1)) {
+                load()
             }
+        }
+    }
+
+    private fun load() {
+        if (nowLoading) return
+        val itemCount = binding.viewHome.adapter?.itemCount ?: -1
+        val childCount = binding.viewHome.childCount
+        val manager = binding.viewHome.layoutManager as LinearLayoutManager
+        val firstPosition = manager.findFirstVisibleItemPosition()
+
+        if (itemCount == childCount + firstPosition) {
+            nowLoading = true
+            binding.progressBar.isVisible = true
+            homeViewModel.listAllPaginated(null)
         }
     }
 

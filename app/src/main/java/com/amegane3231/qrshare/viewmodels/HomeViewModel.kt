@@ -57,6 +57,6 @@ class HomeViewModel : ViewModel() {
     }
 
     companion object {
-        private const val COUNT_RESULTS = 10
+        private const val COUNT_RESULTS = 8
     }
 }

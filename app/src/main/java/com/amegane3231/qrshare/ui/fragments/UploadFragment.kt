@@ -17,7 +17,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.data.QRCode
-import com.amegane3231.qrshare.data.StateURL
 import com.amegane3231.qrshare.databinding.FragmentUploadBinding
 import com.amegane3231.qrshare.extentionFunction.isEditing
 import com.amegane3231.qrshare.extentionFunction.isURL
@@ -67,31 +66,6 @@ class UploadFragment : Fragment() {
         val selectedQRCodeURL = args.urlArg
         selectedQRCodeURL?.let {
             binding.edittextInputURL.setText(it)
-        }
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launchWhenCreated {
-            uploadViewModel.channel.receiveAsFlow().collect {
-                if (it.isSuccess) {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.toast_finish_upload),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    findNavController().popBackStack()
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.toast_fail_upload),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
         }
 
         binding.edittextInputURL.addTextChangedListener(object : CustomTextWatcher {
@@ -151,6 +125,31 @@ class UploadFragment : Fragment() {
                 }
             }
         })
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        lifecycleScope.launchWhenCreated {
+            uploadViewModel.channel.receiveAsFlow().collect {
+                if (it.isSuccess) {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.toast_finish_upload),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    findNavController().popBackStack()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.toast_fail_upload),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -161,7 +160,6 @@ class UploadFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_submit -> {
-                var stateURL: StateURL = StateURL.invalidURL
                 url = binding.edittextInputURL.text.toString()
                 if (!url.isURL()) {
                     binding.edittextInputURL.error = getString(R.string.error_URL)
@@ -169,22 +167,25 @@ class UploadFragment : Fragment() {
                     binding.imageviewQRCode.setImageBitmap(null)
                     return false
                 }
+                val list = binding.edittextInputTag.text.split(" ")
+                val hashTags = list.filter { it.startsWith("#") }
+                if (list.size != hashTags.size) {
+                    binding.edittextInputTag.error = getString(R.string.error_hash_tag)
+                    return false
+                }
+
                 try {
                     val client = OkHttpClient()
                     val request = Request.Builder().url(url).build()
                     val call = client.newCall(request)
                     call.enqueue(object : Callback {
                         override fun onFailure(call: Call, e: IOException) {
-                            
+
                         }
 
                         override fun onResponse(call: Call, response: Response) {
                             val responseCode = response.code()
-                            if (responseCode != 200) {
-                                stateURL = StateURL.failureConnectURL
-                                return
-                            }
-                            stateURL = StateURL.successConnectURL
+                            if (responseCode != 200) return
                             val date = LocalDateTime.now()
                             val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
                             val fileName = auth.uid + dateTimeFormatter.format(date)
@@ -193,7 +194,7 @@ class UploadFragment : Fragment() {
                                 uploadViewModel.upload(
                                     qrCode,
                                     auth.uid!!,
-                                    binding.edittextInputTag.text.split(" ")
+                                    hashTags
                                 )
                             }
 
@@ -202,27 +203,7 @@ class UploadFragment : Fragment() {
                 } catch (e: Exception) {
                     Log.e("Exception", e.toString())
                     binding.edittextInputURL.error = getString(R.string.text_invalid_URL)
-                    stateURL = StateURL.invalidURL
                     return false
-                }
-                when (stateURL) {
-                    StateURL.invalidURL -> {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.toast_invalid_or_fail_access_URL),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    StateURL.failureConnectURL -> {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.toast_invalid_or_fail_access_URL),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    StateURL.successConnectURL -> {
-
-                    }
                 }
             }
         }

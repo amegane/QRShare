@@ -82,7 +82,7 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(action)
             }
         })
-        
+
         binding.viewHome.adapter = recyclerViewAdapter
         binding.viewHome.setHasFixedSize(true)
         binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2).apply {
@@ -91,14 +91,11 @@ class HomeFragment : Fragment() {
         }
         binding.viewHome.addOnScrollListener(InfiniteScrollListener())
 
-
-
         homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
             recyclerViewAdapter.add(it)
             binding.progressBar.isVisible = false
             nowLoading = false
         })
-
 
         homeViewModel.listAllPaginated(null)
 
@@ -136,19 +133,23 @@ class HomeFragment : Fragment() {
     inner class InfiniteScrollListener : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            if (nowLoading) return
-            val itemCount = binding.viewHome.adapter?.itemCount ?: -1
-            val childCount = binding.viewHome.childCount
-            val manager = binding.viewHome.layoutManager as LinearLayoutManager
-            val firstPosition = manager.findFirstVisibleItemPosition()
-
-            Log.d("itemCount", itemCount.toString())
-
-            if (itemCount == childCount + firstPosition) {
-                nowLoading = true
-                binding.progressBar.isVisible = true
-                homeViewModel.listAllPaginated(null)
+            if (!recyclerView.canScrollVertically(1)) {
+                load()
             }
+        }
+    }
+
+    private fun load() {
+        if (nowLoading) return
+        val itemCount = binding.viewHome.adapter?.itemCount ?: -1
+        val childCount = binding.viewHome.childCount
+        val manager = binding.viewHome.layoutManager as LinearLayoutManager
+        val firstPosition = manager.findFirstVisibleItemPosition()
+
+        if (itemCount == childCount + firstPosition) {
+            nowLoading = true
+            binding.progressBar.isVisible = true
+            homeViewModel.listAllPaginated(null)
         }
     }
 

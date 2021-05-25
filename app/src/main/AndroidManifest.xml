@@ -20,6 +20,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.QRShare">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3711976931693295~8493014526" />
+
         <activity
             android:name=".ui.activities.MainActivity"
             android:label="@string/app_name"

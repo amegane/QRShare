@@ -66,6 +66,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'com.google.firebase:firebase-installations:17.0.0'
+    implementation 'com.google.android.gms:play-services-ads:20.1.0'
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
     implementation 'com.firebaseui:firebase-ui-storage:7.1.1'
     implementation('com.google.api-client:google-api-client-android:1.26.0') {

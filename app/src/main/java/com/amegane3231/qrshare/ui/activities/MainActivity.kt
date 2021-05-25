@@ -11,6 +11,10 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.ActivityMainBinding
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.gu.toolargetool.TooLargeTool
 
@@ -41,11 +45,23 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+        MobileAds.initialize(this) {}
+        val adView = AdView(this)
+        binding.adViewContainer.addView(adView)
+        adView.adSize = AdSize.BANNER
+        adView.adUnitId = AD_UNIT_ID
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
     }
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+    companion object {
+        private const val AD_UNIT_ID = "ca-app-pub-3711976931693295/8814725952"
     }
 }

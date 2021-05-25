@@ -167,6 +167,13 @@ class UploadFragment : Fragment() {
                     binding.imageviewQRCode.setImageBitmap(null)
                     return false
                 }
+                val list = binding.edittextInputTag.text.split(" ")
+                val hashTags = list.filter { it.startsWith("#") }
+                if (list.size != hashTags.size) {
+                    binding.edittextInputTag.error = getString(R.string.error_hash_tag)
+                    return false
+                }
+
                 try {
                     val client = OkHttpClient()
                     val request = Request.Builder().url(url).build()
@@ -187,7 +194,7 @@ class UploadFragment : Fragment() {
                                 uploadViewModel.upload(
                                     qrCode,
                                     auth.uid!!,
-                                    binding.edittextInputTag.text.split(" ")
+                                    hashTags
                                 )
                             }
 

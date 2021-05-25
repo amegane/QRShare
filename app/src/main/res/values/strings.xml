@@ -26,4 +26,5 @@
     <string name="toast_fail_decode_qr_code">URLを取得できませんでした</string>
     <string name="button_save_qr_code">QRコードを保存</string>
     <string name="toast_save">保存しました</string>
+    <string name="error_hash_tag">ハッシュタグは#から始まる文字列にしてください</string>
 </resources>

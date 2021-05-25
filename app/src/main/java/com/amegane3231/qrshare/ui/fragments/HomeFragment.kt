@@ -64,7 +64,6 @@ class HomeFragment : Fragment() {
             }
         }
     private var nowLoading = false
-    private lateinit var recyclerViewAdapter: HomeRecyclerViewAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,7 +73,7 @@ class HomeFragment : Fragment() {
 
         homeViewModel.initialize()
 
-        recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
+        val recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
         recyclerViewAdapter.setOnItemClickListener(object :
             HomeRecyclerViewAdapter.OnItemClickListener {
             override fun onClick(view: View, position: Int, path: String, imageName: String) {
@@ -83,6 +82,16 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(action)
             }
         })
+        
+        binding.viewHome.adapter = recyclerViewAdapter
+        binding.viewHome.setHasFixedSize(true)
+        binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2).apply {
+            orientation = GridLayoutManager.VERTICAL
+            recycleChildrenOnDetach = true
+        }
+        binding.viewHome.addOnScrollListener(InfiniteScrollListener())
+
+
 
         homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
             recyclerViewAdapter.add(it)
@@ -90,9 +99,6 @@ class HomeFragment : Fragment() {
             nowLoading = false
         })
 
-        binding.viewHome.adapter = recyclerViewAdapter
-        binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2)
-        binding.viewHome.addOnScrollListener(InfiniteScrollListener())
 
         homeViewModel.listAllPaginated(null)
 

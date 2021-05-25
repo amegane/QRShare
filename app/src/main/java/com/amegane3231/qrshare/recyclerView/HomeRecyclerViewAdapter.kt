@@ -12,7 +12,7 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 
 class HomeRecyclerViewAdapter(
-    private val context: Context,
+    private val context: Context
 ) : RecyclerView.Adapter<HomeRecyclerViewAdapter.HomeRecyclerViewHolder>() {
     private lateinit var listener: OnItemClickListener
     private val storageRefList: MutableList<StorageReference> = mutableListOf()
@@ -27,7 +27,6 @@ class HomeRecyclerViewAdapter(
         val storageRef = Firebase.storage.getReference(item.path)
         val imageView = holder.imageView
         Glide.with(context).load(storageRef).into(imageView)
-
         holder.imageView.setOnClickListener {
             listener.onClick(holder.itemView, position, item.path, item.name)
         }

@@ -31,3 +31,7 @@
 -keep class com.bumptech.glide.load.data.ParcelFileDescriptorRewinder$InternalRewinder {
   *** rewind();
 }
+
+-keep public class com.amegane3231.qrshare.data.QRCode {
+    *;
+}

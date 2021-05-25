@@ -29,14 +29,16 @@ class UploadViewModel : ViewModel() {
             "tags" to tags
         )
 
-        database.collection(uid)
-            .add(fileData)
-            .addOnSuccessListener {
-                Log.d("Add document success", it.id)
-            }
-            .addOnFailureListener {
-                Log.w("Add document failure", it)
-            }
+        viewModelScope.launch {
+            database.collection(uid)
+                .add(fileData)
+                .addOnSuccessListener {
+                    Log.d("Add document success", it.id)
+                }
+                .addOnFailureListener {
+                    Log.w("Add document failure", it)
+                }
+        }
 
         val qrCodeRef = storageRef.child("QRCode/${qrCode.name}")
         val byteArrayOutputStream = ByteArrayOutputStream()

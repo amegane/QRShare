@@ -68,31 +68,6 @@ class UploadFragment : Fragment() {
             binding.edittextInputURL.setText(it)
         }
 
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launchWhenCreated {
-            uploadViewModel.channel.receiveAsFlow().collect {
-                if (it.isSuccess) {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.toast_finish_upload),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    findNavController().popBackStack()
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.toast_fail_upload),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }
-
         binding.edittextInputURL.addTextChangedListener(object : CustomTextWatcher {
             override fun afterTextChanged(charSequence: Editable?) {
                 if (charSequence == null || charSequence.isEmpty()) return
@@ -150,6 +125,31 @@ class UploadFragment : Fragment() {
                 }
             }
         })
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        lifecycleScope.launchWhenCreated {
+            uploadViewModel.channel.receiveAsFlow().collect {
+                if (it.isSuccess) {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.toast_finish_upload),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    findNavController().popBackStack()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.toast_fail_upload),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

@@ -39,13 +39,13 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
+                android:layout_marginBottom="4dp"
                 android:hint="@string/text_url"
-                app:hintTextColor="@color/teal_200"
                 app:boxStrokeColor="@color/teal_200"
+                app:hintTextColor="@color/teal_200"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageview_QR_code">
 
@@ -56,6 +56,7 @@
                     android:autofillHints="@string/hint_input_URL"
                     android:inputType="textUri"
                     android:labelFor="@+id/edittext_input_URL"
+                    android:theme="@style/EditTextColorControl"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/imageview_QR_code" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -65,13 +66,13 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="4dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginEnd="8dp"
+                android:layout_marginBottom="4dp"
                 android:hint="@string/text_tag"
-                app:hintTextColor="@color/teal_200"
                 app:boxStrokeColor="@color/teal_200"
+                app:hintTextColor="@color/teal_200"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/URLField">
 
@@ -82,6 +83,7 @@
                     android:autofillHints="@string/text_tag"
                     android:inputType="text"
                     android:labelFor="@+id/edittext_input_tag"
+                    android:theme="@style/EditTextColorControl"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/URLField" />
             </com.google.android.material.textfield.TextInputLayout>

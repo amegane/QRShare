@@ -25,7 +25,7 @@ class DetailViewModel : ViewModel() {
         _url.value = ""
     }
 
-    fun getTags(uid: String, fileName: String) {
+    fun getFileData(uid: String, fileName: String) {
         Log.d("uid", uid)
         Log.d("fileName", fileName)
         dataBase.collection(uid).whereIn("name", mutableListOf(fileName)).get()

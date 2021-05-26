@@ -66,14 +66,22 @@ class LoginActivity : AppCompatActivity() {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential).addOnCompleteListener {
             if (it.isSuccessful) {
-                Toast.makeText(applicationContext, "ログインに成功しました", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    applicationContext,
+                    getString(R.string.toast_success_login),
+                    Toast.LENGTH_SHORT
+                ).show()
                 val intent = Intent(application, MainActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
                 finish()
             } else {
                 Log.w("SingIn Failed", it.exception)
-                Toast.makeText(applicationContext, "ログインに失敗しました", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    applicationContext,
+                    getString(R.string.toast_failure_login),
+                    Toast.LENGTH_SHORT
+                ).show()
                 googleSignInClient.signOut()
             }
         }

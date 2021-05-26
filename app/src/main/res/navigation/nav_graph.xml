@@ -60,5 +60,4 @@
             android:name="imageNameArg"
             app:argType="string" />
     </fragment>
-
 </navigation>

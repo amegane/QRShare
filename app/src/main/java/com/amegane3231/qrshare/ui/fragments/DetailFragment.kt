@@ -50,7 +50,7 @@ class DetailFragment : Fragment() {
 
         val selectedQRCodeUid = args.uidArg
         val selectedQRCodeName = args.imageNameArg
-        detailViewModel.getTags(selectedQRCodeUid, selectedQRCodeName)
+        detailViewModel.getFileData(selectedQRCodeUid, selectedQRCodeName)
 
         val adapter = FlexboxListAdapter()
 

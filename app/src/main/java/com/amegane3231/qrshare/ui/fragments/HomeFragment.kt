@@ -130,15 +130,6 @@ class HomeFragment : Fragment() {
         return bitmap
     }
 
-    inner class InfiniteScrollListener : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-            if (!recyclerView.canScrollVertically(1)) {
-                load()
-            }
-        }
-    }
-
     private fun load() {
         if (nowLoading) return
         val itemCount = binding.viewHome.adapter?.itemCount ?: -1
@@ -150,6 +141,15 @@ class HomeFragment : Fragment() {
             nowLoading = true
             binding.progressBar.isVisible = true
             homeViewModel.listAllPaginated(null)
+        }
+    }
+
+    inner class InfiniteScrollListener : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            if (!recyclerView.canScrollVertically(1)) {
+                load()
+            }
         }
     }
 

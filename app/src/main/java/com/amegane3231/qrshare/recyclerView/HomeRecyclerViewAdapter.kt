@@ -11,7 +11,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 
-class HomeRecyclerViewAdapter(
+class HomeRecyclerViewAdapter constructor(
     private val context: Context
 ) : RecyclerView.Adapter<HomeRecyclerViewAdapter.HomeRecyclerViewHolder>() {
     private lateinit var listener: OnItemClickListener

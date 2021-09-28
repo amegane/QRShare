@@ -18,6 +18,7 @@ import androidx.navigation.fragment.navArgs
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.data.QRCode
 import com.amegane3231.qrshare.databinding.FragmentUploadBinding
+import com.amegane3231.qrshare.di.withFactory
 import com.amegane3231.qrshare.extentionFunction.isEditing
 import com.amegane3231.qrshare.extentionFunction.isURL
 import com.amegane3231.qrshare.extentionFunction.removeHashTagSpans
@@ -25,21 +26,26 @@ import com.amegane3231.qrshare.hashTagSpan.HashTagForegroundColorSpan
 import com.amegane3231.qrshare.hashTagSpan.HashTagUnderlineSpan
 import com.amegane3231.qrshare.interfaces.CustomTextWatcher
 import com.amegane3231.qrshare.viewmodels.UploadViewModel
+import com.amegane3231.qrshare.viewmodels.UploadViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
-import com.google.zxing.BarcodeFormat
-import com.journeyapps.barcodescanner.BarcodeEncoder
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
 import okhttp3.*
 import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class UploadFragment : Fragment() {
+    @Inject
+    lateinit var uploadViewModelFactory: UploadViewModelFactory
+
     private lateinit var binding: FragmentUploadBinding
     private lateinit var auth: FirebaseAuth
     private val args: UploadFragmentArgs by navArgs()
-    private val uploadViewModel: UploadViewModel by viewModels()
+    private val uploadViewModel: UploadViewModel by viewModels { withFactory(uploadViewModelFactory) }
     private var qrCodeImage: Bitmap? = null
     private var url: String = ""
 
@@ -79,11 +85,13 @@ class UploadFragment : Fragment() {
                     return
                 }
                 url = data
-                val qrCode = createQRCode(data)
-                qrCode?.let {
-                    this@UploadFragment.qrCodeImage = it
+                val qrCode = uploadViewModel.createQRCode(data)
+                if (qrCode != null) {
+                    this@UploadFragment.qrCodeImage = qrCode
                     binding.textviewQRCode.isVisible = false
-                    binding.imageviewQRCode.setImageBitmap(it)
+                    binding.imageviewQRCode.setImageBitmap(qrCode)
+                } else {
+                    binding.edittextInputURL.error = getString(R.string.error_URL)
                 }
             }
         })
@@ -210,21 +218,7 @@ class UploadFragment : Fragment() {
         return false
     }
 
-    private fun createQRCode(URL: String): Bitmap? {
-        return try {
-            val barcodeEncoder = BarcodeEncoder()
-            val bitmap =
-                barcodeEncoder.encodeBitmap(URL, BarcodeFormat.QR_CODE, SIZE_QRCODE, SIZE_QRCODE)
-            bitmap
-        } catch (e: Exception) {
-            Log.e("Exception", e.toString())
-            binding.edittextInputURL.error = getString(R.string.error_URL)
-            null
-        }
-    }
-
     companion object {
-        private const val SIZE_QRCODE = 512
         private const val PATTERN = "(?:^|\\s)(#([^\\s]+))[^\\s]?"
     }
 }

@@ -7,9 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class DetailViewModel : ViewModel() {
+@HiltViewModel
+class DetailViewModel @Inject constructor() : ViewModel() {
     private val dataBase = Firebase.firestore
     private val _tagList: MutableLiveData<List<String>> by lazy {
         MutableLiveData<List<String>>()

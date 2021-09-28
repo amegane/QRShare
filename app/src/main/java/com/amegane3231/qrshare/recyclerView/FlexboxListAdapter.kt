@@ -1,11 +1,13 @@
 package com.amegane3231.qrshare.recyclerView
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.amegane3231.qrshare.databinding.ItemTagBinding
 
-class FlexboxListAdapter : RecyclerView.Adapter<FlexboxListAdapter.FlexboxListViewHolder>() {
+class FlexboxListAdapter constructor() :
+    RecyclerView.Adapter<FlexboxListAdapter.FlexboxListViewHolder>() {
     private val tags = mutableListOf<String>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FlexboxListViewHolder {
@@ -22,6 +24,7 @@ class FlexboxListAdapter : RecyclerView.Adapter<FlexboxListAdapter.FlexboxListVi
         holder.tagName.text = tag
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun update(tags: List<String>) {
         this.tags.removeAll(this.tags)
         this.tags.addAll(tags)

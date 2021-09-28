@@ -20,23 +20,30 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.FragmentDetailBinding
+import com.amegane3231.qrshare.di.withFactory
 import com.amegane3231.qrshare.recyclerView.FlexboxListAdapter
 import com.amegane3231.qrshare.viewmodels.DetailViewModel
+import com.amegane3231.qrshare.viewmodels.DetailViewModelFactory
 import com.bumptech.glide.Glide
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class DetailFragment : Fragment() {
+    @Inject
+    lateinit var detailViewModelFactory: DetailViewModelFactory
+
     private lateinit var binding: FragmentDetailBinding
     private val args: DetailFragmentArgs by navArgs()
-    private val detailViewModel: DetailViewModel by viewModels()
+    private val detailViewModel: DetailViewModel by viewModels { withFactory(detailViewModelFactory) }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

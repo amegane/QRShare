@@ -8,9 +8,10 @@ import com.bumptech.glide.module.AppGlideModule
 import com.firebase.ui.storage.images.FirebaseImageLoader
 import com.google.firebase.storage.StorageReference
 import java.io.InputStream
+import javax.inject.Inject
 
 @GlideModule
-class QRShareGlideModule : AppGlideModule() {
+class QRShareGlideModule @Inject constructor() : AppGlideModule() {
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
         registry.append(
             StorageReference::class.java,

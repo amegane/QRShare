@@ -22,16 +22,24 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.FragmentHomeBinding
+import com.amegane3231.qrshare.di.withFactory
 import com.amegane3231.qrshare.recyclerView.HomeRecyclerViewAdapter
 import com.amegane3231.qrshare.viewmodels.HomeViewModel
+import com.amegane3231.qrshare.viewmodels.HomeViewModelFactory
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
+    @Inject
+    lateinit var homeViewModelFactory: HomeViewModelFactory
+
     private lateinit var binding: FragmentHomeBinding
-    private val homeViewModel: HomeViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by viewModels { withFactory(homeViewModelFactory) }
     private val imageContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK && it.data != null) {

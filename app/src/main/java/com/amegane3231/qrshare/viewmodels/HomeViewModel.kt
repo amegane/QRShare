@@ -11,9 +11,12 @@ import com.google.firebase.storage.ktx.component1
 import com.google.firebase.storage.ktx.component2
 import com.google.firebase.storage.ktx.component3
 import com.google.firebase.storage.ktx.storage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor() : ViewModel() {
     private val storage = Firebase.storage
     private val listRef = storage.reference.child("QRCode")
     private val _storageList: MutableLiveData<List<StorageReference>> by lazy {

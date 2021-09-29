@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class UploadUseCase @Inject constructor(private val repository: QRCodeRepository) {
-    fun uploadQRCode(fileData: UploadedQRCodeData): Flow<UploadTask> {
+    suspend fun uploadQRCode(fileData: UploadedQRCodeData): Flow<UploadTask> {
         return flow {
             emit(
                 repository.upload(fileData)

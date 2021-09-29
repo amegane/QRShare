@@ -22,18 +22,19 @@ class UploadViewModel @Inject constructor(private val uploadUseCase: UploadUseCa
     val channel: ReceiveChannel<Result<Int>> get() = _channel
 
     fun upload(qrCode: QRCode, uid: String, tags: List<String>) {
-        val uploadTask = uploadUseCase.uploadQRCode(UploadedQRCodeData(uid, qrCode, tags))
-        uploadTask.map { task ->
-            task.addOnFailureListener {
-                Log.e("Exception", it.toString())
-                Log.v("Success", "Upload Finished")
-                viewModelScope.launch {
-                    _channel.send(Result.failure(it))
-                }
-            }.addOnSuccessListener {
-                Log.v("Success", "Upload Finished")
-                viewModelScope.launch {
-                    _channel.send(Result.success(1))
+        viewModelScope.launch {
+            uploadUseCase.uploadQRCode(UploadedQRCodeData(uid, qrCode, tags)).map { task ->
+                task.addOnFailureListener {
+                    Log.e("Exception", it.toString())
+                    Log.v("Success", "Upload Finished")
+                    viewModelScope.launch {
+                        _channel.send(Result.failure(it))
+                    }
+                }.addOnSuccessListener {
+                    Log.v("Success", "Upload Finished")
+                    viewModelScope.launch {
+                        _channel.send(Result.success(1))
+                    }
                 }
             }
         }

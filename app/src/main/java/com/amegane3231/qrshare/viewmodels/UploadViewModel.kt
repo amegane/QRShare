@@ -12,7 +12,7 @@ import com.journeyapps.barcodescanner.BarcodeEncoder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,7 +23,7 @@ class UploadViewModel @Inject constructor(private val uploadUseCase: UploadUseCa
 
     fun upload(qrCode: QRCode, uid: String, tags: List<String>) {
         viewModelScope.launch {
-            uploadUseCase.uploadQRCode(UploadedQRCodeData(uid, qrCode, tags)).map { task ->
+            uploadUseCase.uploadQRCode(UploadedQRCodeData(uid, qrCode, tags)).collect { task ->
                 task.addOnFailureListener {
                     Log.e("Exception", it.toString())
                     Log.v("Success", "Upload Finished")

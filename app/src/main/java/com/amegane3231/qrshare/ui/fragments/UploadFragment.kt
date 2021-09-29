@@ -43,10 +43,15 @@ class UploadFragment : Fragment() {
     lateinit var uploadViewModelFactory: UploadViewModelFactory
 
     private lateinit var binding: FragmentUploadBinding
+
     private lateinit var auth: FirebaseAuth
+
     private val args: UploadFragmentArgs by navArgs()
+
     private val uploadViewModel: UploadViewModel by viewModels { withFactory(uploadViewModelFactory) }
+
     private var qrCodeImage: Bitmap? = null
+
     private var url: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,8 +64,12 @@ class UploadFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentUploadBinding.inflate(inflater, container, false)
-
         setHasOptionsMenu(true)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val selectedQRCode = args.imageArg
         selectedQRCode?.let {
@@ -133,12 +142,6 @@ class UploadFragment : Fragment() {
                 }
             }
         })
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenCreated {
             uploadViewModel.channel.receiveAsFlow().collect {

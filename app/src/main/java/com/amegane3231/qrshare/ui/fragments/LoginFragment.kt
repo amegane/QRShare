@@ -27,8 +27,11 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
     private lateinit var binding: FragmentLoginBinding
+
     private lateinit var auth: FirebaseAuth
+
     private lateinit var googleSignInClient: GoogleSignInClient
+
     private val singInContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {

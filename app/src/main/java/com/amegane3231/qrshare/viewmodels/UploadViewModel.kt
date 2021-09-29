@@ -19,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UploadViewModel @Inject constructor(private val uploadUseCase: UploadUseCase) : ViewModel() {
     private val _channel = Channel<Result<Int>>(Channel.UNLIMITED)
+
     val channel: ReceiveChannel<Result<Int>> get() = _channel
 
     fun upload(qrCode: QRCode, uid: String, tags: List<String>) {

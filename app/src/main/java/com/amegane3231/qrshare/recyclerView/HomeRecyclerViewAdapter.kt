@@ -11,10 +11,10 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 
-class HomeRecyclerViewAdapter constructor(
-    private val context: Context
-) : RecyclerView.Adapter<HomeRecyclerViewAdapter.HomeRecyclerViewHolder>() {
+class HomeRecyclerViewAdapter(private val context: Context) :
+    RecyclerView.Adapter<HomeRecyclerViewAdapter.HomeRecyclerViewHolder>() {
     private lateinit var listener: OnItemClickListener
+
     private val storageRefList: MutableList<StorageReference> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeRecyclerViewHolder {

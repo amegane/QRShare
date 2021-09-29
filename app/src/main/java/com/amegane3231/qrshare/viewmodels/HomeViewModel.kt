@@ -1,5 +1,9 @@
 package com.amegane3231.qrshare.viewmodels
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -19,12 +23,17 @@ class HomeViewModel @Inject constructor(
     private val getStorageReferenceUseCase: GetStorageReferenceUseCase
 ) : ViewModel() {
     private val storage = Firebase.storage
+
     private val listRef = storage.reference.child("QRCode")
+
     private val _storageList: MutableLiveData<List<StorageReference>> by lazy {
         MutableLiveData<List<StorageReference>>()
     }
+
     val storageList: LiveData<List<StorageReference>> get() = _storageList
+
     private var pageToken: String? = null
+
     private var isTokenNullable = true
 
     init {
@@ -59,6 +68,15 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun getBitmap(context: Context, uri: Uri): Bitmap {
+        val openFileDescriptor =
+            context.contentResolver.openFileDescriptor(uri, "r")
+        val fileDescriptor = openFileDescriptor?.fileDescriptor
+        val bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor)
+        openFileDescriptor?.close()
+        return bitmap
     }
 
     companion object {

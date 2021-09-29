@@ -6,8 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.amegane3231.qrshare.databinding.ItemTagBinding
 
-class FlexboxListAdapter constructor() :
-    RecyclerView.Adapter<FlexboxListAdapter.FlexboxListViewHolder>() {
+class FlexboxListAdapter : RecyclerView.Adapter<FlexboxListAdapter.FlexboxListViewHolder>() {
     private val tags = mutableListOf<String>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FlexboxListViewHolder {

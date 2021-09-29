@@ -2,9 +2,6 @@ package com.amegane3231.qrshare.ui.fragments
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -40,14 +37,16 @@ class HomeFragment : Fragment() {
     lateinit var homeViewModelFactory: HomeViewModelFactory
 
     private lateinit var binding: FragmentHomeBinding
+
     private val homeViewModel: HomeViewModel by viewModels { withFactory(homeViewModelFactory) }
+
     private val imageContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK && it.data != null) {
                 val uri = it.data!!.data
 
                 uri?.let {
-                    val bitmap = getBitmap(uri)
+                    val bitmap = homeViewModel.getBitmap(requireContext(), uri)
                     val width = bitmap.width
                     val height = bitmap.height
                     val pixels = IntArray(width * height)
@@ -72,6 +71,7 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+
     private var nowLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,8 +87,11 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        homeViewModel.initialize()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
         recyclerViewAdapter.setOnItemClickListener(object :
@@ -100,6 +103,14 @@ class HomeFragment : Fragment() {
             }
         })
 
+        homeViewModel.initialize()
+
+        homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
+            recyclerViewAdapter.add(it)
+            binding.progressBar.isVisible = false
+            nowLoading = false
+        })
+
         binding.viewHome.adapter = recyclerViewAdapter
         binding.viewHome.setHasFixedSize(true)
         binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2).apply {
@@ -108,17 +119,13 @@ class HomeFragment : Fragment() {
         }
         binding.viewHome.addOnScrollListener(InfiniteScrollListener())
 
-        homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
-            recyclerViewAdapter.add(it)
-            binding.progressBar.isVisible = false
-            nowLoading = false
-        })
 
         homeViewModel.listAllPaginated(null)
 
         binding.fabCreateQRCode.setOnClickListener {
             findNavController().navigate(R.id.action_Home_to_Upload)
         }
+
         binding.fabUploadQRCode.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -134,17 +141,6 @@ class HomeFragment : Fragment() {
                 ).show()
             }
         }
-
-        return binding.root
-    }
-
-    private fun getBitmap(uri: Uri): Bitmap {
-        val openFileDescriptor =
-            requireContext().contentResolver.openFileDescriptor(uri, "r")
-        val fileDescriptor = openFileDescriptor?.fileDescriptor
-        val bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor)
-        openFileDescriptor?.close()
-        return bitmap
     }
 
     private fun load() {

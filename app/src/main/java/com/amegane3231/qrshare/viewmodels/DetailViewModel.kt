@@ -5,15 +5,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.amegane3231.qrshare.usecase.GetQRCodeDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DetailViewModel @Inject constructor() : ViewModel() {
-    private val dataBase = Firebase.firestore
+class DetailViewModel @Inject constructor(
+    private val getQRCodeDetailUseCase: GetQRCodeDetailUseCase
+) : ViewModel() {
     private val _tagList: MutableLiveData<List<String>> by lazy {
         MutableLiveData<List<String>>()
     }
@@ -31,18 +32,16 @@ class DetailViewModel @Inject constructor() : ViewModel() {
     fun getFileData(uid: String, fileName: String) {
         Log.d("uid", uid)
         Log.d("fileName", fileName)
-        dataBase.collection(uid).whereIn("name", mutableListOf(fileName)).get()
-            .addOnSuccessListener { result ->
-                val data = result.documents[0].data
-                val tags = data?.getValue("tags") as ArrayList<String>
-                val url = data.getValue("url") as String
-                viewModelScope.launch {
-                    _tagList.postValue(tags)
-                    _url.postValue(url)
+
+        viewModelScope.launch {
+            getQRCodeDetailUseCase.getFileData(uid, fileName).collect { task ->
+                task.addOnSuccessListener {
+                    _tagList.postValue(it.tags)
+                    _url.postValue(it.url)
+                }.addOnFailureListener {
+                    Log.e("Exception", it.toString())
                 }
             }
-            .addOnFailureListener {
-                Log.e("Exception", it.toString())
-            }
+        }
     }
 }

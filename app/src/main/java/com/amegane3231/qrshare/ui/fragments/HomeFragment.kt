@@ -26,6 +26,7 @@ import com.amegane3231.qrshare.di.withFactory
 import com.amegane3231.qrshare.recyclerView.HomeRecyclerViewAdapter
 import com.amegane3231.qrshare.viewmodels.HomeViewModel
 import com.amegane3231.qrshare.viewmodels.HomeViewModelFactory
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.common.HybridBinarizer
@@ -72,6 +73,14 @@ class HomeFragment : Fragment() {
             }
         }
     private var nowLoading = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val account = GoogleSignIn.getLastSignedInAccount(requireContext())
+        if (account == null) {
+            findNavController().navigate(R.id.action_Home_to_Login)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

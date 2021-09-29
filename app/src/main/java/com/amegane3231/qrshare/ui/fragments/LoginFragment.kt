@@ -1,14 +1,17 @@
-package com.amegane3231.qrshare.ui.activities
+package com.amegane3231.qrshare.ui.fragments
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.amegane3231.qrshare.R
-import com.amegane3231.qrshare.databinding.ActivityLoginBinding
+import com.amegane3231.qrshare.databinding.FragmentLoginBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -22,8 +25,8 @@ import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class LoginActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityLoginBinding
+class LoginFragment : Fragment() {
+    private lateinit var binding: FragmentLoginBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
     private val singInContent =
@@ -34,11 +37,17 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentLoginBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         binding.buttonSignIn.setOnClickListener {
             val googleSignInOptions =
@@ -46,7 +55,7 @@ class LoginActivity : AppCompatActivity() {
                     .requestIdToken(getString(R.string.web_client_id))
                     .requestEmail()
                     .build()
-            googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions)
+            googleSignInClient = GoogleSignIn.getClient(requireActivity(), googleSignInOptions)
 
             auth = Firebase.auth
 
@@ -69,18 +78,15 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(credential).addOnCompleteListener {
             if (it.isSuccessful) {
                 Toast.makeText(
-                    applicationContext,
+                    requireContext(),
                     getString(R.string.toast_success_login),
                     Toast.LENGTH_SHORT
                 ).show()
-                val intent = Intent(application, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                startActivity(intent)
-                finish()
+                findNavController().navigate(R.id.action_Login_to_Home)
             } else {
                 Log.w("SingIn Failed", it.exception)
                 Toast.makeText(
-                    applicationContext,
+                    requireContext(),
                     getString(R.string.toast_failure_login),
                     Toast.LENGTH_SHORT
                 ).show()

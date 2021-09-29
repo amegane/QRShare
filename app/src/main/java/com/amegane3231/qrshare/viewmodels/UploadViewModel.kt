@@ -10,8 +10,8 @@ import com.amegane3231.qrshare.usecase.UploadUseCase
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import okhttp3.*
@@ -22,7 +22,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UploadViewModel @Inject constructor(private val uploadUseCase: UploadUseCase) : ViewModel() {
-    private val _channel = Channel<Result<Int>>(Channel.UNLIMITED)
+    private val _uploadState = MutableStateFlow<Result<Int>?>(null)
+
+    val uploadState: StateFlow<Result<Int>?> get() = _uploadState
 
     fun upload(url: String, uid: String, image: Bitmap?, hashTags: List<String>) {
         val client = OkHttpClient()
@@ -44,16 +46,16 @@ class UploadViewModel @Inject constructor(private val uploadUseCase: UploadUseCa
                     viewModelScope.launch {
                         uploadUseCase.uploadQRCode(UploadedQRCodeData(uid, qrCode, hashTags))
                             .collect { task ->
-                                task.addOnFailureListener {
-                                    Log.e("Exception", it.toString())
+                                task.addOnFailureListener { exception ->
+                                    Log.e("Exception", exception.toString())
                                     Log.v("Success", "Upload Finished")
                                     viewModelScope.launch {
-                                        _channel.send(Result.failure(it))
+                                        _uploadState.emit(Result.failure(exception))
                                     }
                                 }.addOnSuccessListener {
                                     Log.v("Success", "Upload Finished")
                                     viewModelScope.launch {
-                                        _channel.send(Result.success(1))
+                                        _uploadState.emit(Result.success(1))
                                     }
                                 }
                             }

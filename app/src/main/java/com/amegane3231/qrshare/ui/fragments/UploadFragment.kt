@@ -28,8 +28,9 @@ import com.amegane3231.qrshare.viewmodels.UploadViewModel
 import com.amegane3231.qrshare.viewmodels.UploadViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import okhttp3.*
 import javax.inject.Inject
 
@@ -64,6 +65,7 @@ class UploadFragment : Fragment() {
         return binding.root
     }
 
+    @InternalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -139,9 +141,9 @@ class UploadFragment : Fragment() {
             }
         })
 
-        lifecycleScope.launchWhenCreated {
-            uploadViewModel.channel.receiveAsFlow().collect {
-                if (it.isSuccess) {
+        lifecycleScope.launch {
+            uploadViewModel.uploadState.collect {
+                if (it?.isSuccess == true) {
                     Toast.makeText(
                         requireContext(),
                         getString(R.string.toast_finish_upload),

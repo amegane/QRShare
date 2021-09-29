@@ -16,7 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.amegane3231.qrshare.R
-import com.amegane3231.qrshare.data.QRCode
 import com.amegane3231.qrshare.databinding.FragmentUploadBinding
 import com.amegane3231.qrshare.di.withFactory
 import com.amegane3231.qrshare.extentionFunction.isEditing
@@ -32,9 +31,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
 import okhttp3.*
-import java.io.IOException
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -186,31 +182,7 @@ class UploadFragment : Fragment() {
                 }
 
                 try {
-                    val client = OkHttpClient()
-                    val request = Request.Builder().url(url).build()
-                    val call = client.newCall(request)
-                    call.enqueue(object : Callback {
-                        override fun onFailure(call: Call, e: IOException) {
-
-                        }
-
-                        override fun onResponse(call: Call, response: Response) {
-                            val responseCode = response.code()
-                            if (responseCode != 200) return
-                            val date = LocalDateTime.now()
-                            val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
-                            val fileName = auth.uid + dateTimeFormatter.format(date)
-                            qrCodeImage?.also {
-                                val qrCode = QRCode(it, "$fileName.jpg", url)
-                                uploadViewModel.upload(
-                                    qrCode,
-                                    auth.uid!!,
-                                    hashTags
-                                )
-                            }
-
-                        }
-                    })
+                    uploadViewModel.upload(url, auth.uid!!, qrCodeImage, hashTags)
                 } catch (e: Exception) {
                     Log.e("Exception", e.toString())
                     binding.edittextInputURL.error = getString(R.string.text_invalid_URL)

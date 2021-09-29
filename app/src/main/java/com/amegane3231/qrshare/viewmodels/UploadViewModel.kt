@@ -14,31 +14,54 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import okhttp3.*
+import java.io.IOException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
 class UploadViewModel @Inject constructor(private val uploadUseCase: UploadUseCase) : ViewModel() {
     private val _channel = Channel<Result<Int>>(Channel.UNLIMITED)
 
-    val channel: ReceiveChannel<Result<Int>> get() = _channel
+    fun upload(url: String, uid: String, image: Bitmap?, hashTags: List<String>) {
+        val client = OkHttpClient()
+        val request = Request.Builder().url(url).build()
+        val call = client.newCall(request)
+        call.enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
 
-    fun upload(qrCode: QRCode, uid: String, tags: List<String>) {
-        viewModelScope.launch {
-            uploadUseCase.uploadQRCode(UploadedQRCodeData(uid, qrCode, tags)).collect { task ->
-                task.addOnFailureListener {
-                    Log.e("Exception", it.toString())
-                    Log.v("Success", "Upload Finished")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseCode = response.code()
+                if (responseCode != 200) return
+                val date = LocalDateTime.now()
+                val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
+                val fileName = uid + dateTimeFormatter.format(date)
+                image?.also {
+                    val qrCode = QRCode(it, "$fileName.jpg", url)
                     viewModelScope.launch {
-                        _channel.send(Result.failure(it))
-                    }
-                }.addOnSuccessListener {
-                    Log.v("Success", "Upload Finished")
-                    viewModelScope.launch {
-                        _channel.send(Result.success(1))
+                        uploadUseCase.uploadQRCode(UploadedQRCodeData(uid, qrCode, hashTags))
+                            .collect { task ->
+                                task.addOnFailureListener {
+                                    Log.e("Exception", it.toString())
+                                    Log.v("Success", "Upload Finished")
+                                    viewModelScope.launch {
+                                        _channel.send(Result.failure(it))
+                                    }
+                                }.addOnSuccessListener {
+                                    Log.v("Success", "Upload Finished")
+                                    viewModelScope.launch {
+                                        _channel.send(Result.success(1))
+                                    }
+                                }
+                            }
                     }
                 }
+
             }
-        }
+        })
     }
 
     fun createQRCode(URL: String): Bitmap? {

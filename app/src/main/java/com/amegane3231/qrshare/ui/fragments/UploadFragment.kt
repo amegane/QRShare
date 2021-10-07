@@ -16,8 +16,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.amegane3231.qrshare.R
-import com.amegane3231.qrshare.data.QRCode
 import com.amegane3231.qrshare.databinding.FragmentUploadBinding
+import com.amegane3231.qrshare.di.withFactory
 import com.amegane3231.qrshare.extentionFunction.isEditing
 import com.amegane3231.qrshare.extentionFunction.isURL
 import com.amegane3231.qrshare.extentionFunction.removeHashTagSpans
@@ -25,22 +25,30 @@ import com.amegane3231.qrshare.hashTagSpan.HashTagForegroundColorSpan
 import com.amegane3231.qrshare.hashTagSpan.HashTagUnderlineSpan
 import com.amegane3231.qrshare.interfaces.CustomTextWatcher
 import com.amegane3231.qrshare.viewmodels.UploadViewModel
+import com.amegane3231.qrshare.viewmodels.UploadViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
-import com.google.zxing.BarcodeFormat
-import com.journeyapps.barcodescanner.BarcodeEncoder
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import okhttp3.*
-import java.io.IOException
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class UploadFragment : Fragment() {
+    @Inject
+    lateinit var uploadViewModelFactory: UploadViewModelFactory
+
     private lateinit var binding: FragmentUploadBinding
+
     private lateinit var auth: FirebaseAuth
+
     private val args: UploadFragmentArgs by navArgs()
-    private val uploadViewModel: UploadViewModel by viewModels()
+
+    private val uploadViewModel: UploadViewModel by viewModels { withFactory(uploadViewModelFactory) }
+
     private var qrCodeImage: Bitmap? = null
+
     private var url: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,8 +61,13 @@ class UploadFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentUploadBinding.inflate(inflater, container, false)
-
         setHasOptionsMenu(true)
+        return binding.root
+    }
+
+    @InternalCoroutinesApi
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val selectedQRCode = args.imageArg
         selectedQRCode?.let {
@@ -79,11 +92,13 @@ class UploadFragment : Fragment() {
                     return
                 }
                 url = data
-                val qrCode = createQRCode(data)
-                qrCode?.let {
-                    this@UploadFragment.qrCodeImage = it
+                val qrCode = uploadViewModel.createQRCode(data)
+                if (qrCode != null) {
+                    this@UploadFragment.qrCodeImage = qrCode
                     binding.textviewQRCode.isVisible = false
-                    binding.imageviewQRCode.setImageBitmap(it)
+                    binding.imageviewQRCode.setImageBitmap(qrCode)
+                } else {
+                    binding.edittextInputURL.error = getString(R.string.error_URL)
                 }
             }
         })
@@ -126,15 +141,9 @@ class UploadFragment : Fragment() {
             }
         })
 
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launchWhenCreated {
-            uploadViewModel.channel.receiveAsFlow().collect {
-                if (it.isSuccess) {
+        lifecycleScope.launch {
+            uploadViewModel.uploadState.collect {
+                if (it?.isSuccess == true) {
                     Toast.makeText(
                         requireContext(),
                         getString(R.string.toast_finish_upload),
@@ -175,31 +184,7 @@ class UploadFragment : Fragment() {
                 }
 
                 try {
-                    val client = OkHttpClient()
-                    val request = Request.Builder().url(url).build()
-                    val call = client.newCall(request)
-                    call.enqueue(object : Callback {
-                        override fun onFailure(call: Call, e: IOException) {
-
-                        }
-
-                        override fun onResponse(call: Call, response: Response) {
-                            val responseCode = response.code()
-                            if (responseCode != 200) return
-                            val date = LocalDateTime.now()
-                            val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
-                            val fileName = auth.uid + dateTimeFormatter.format(date)
-                            qrCodeImage?.also {
-                                val qrCode = QRCode(it, "$fileName.jpg", url)
-                                uploadViewModel.upload(
-                                    qrCode,
-                                    auth.uid!!,
-                                    hashTags
-                                )
-                            }
-
-                        }
-                    })
+                    uploadViewModel.upload(url, auth.uid!!, qrCodeImage, hashTags)
                 } catch (e: Exception) {
                     Log.e("Exception", e.toString())
                     binding.edittextInputURL.error = getString(R.string.text_invalid_URL)
@@ -210,21 +195,7 @@ class UploadFragment : Fragment() {
         return false
     }
 
-    private fun createQRCode(URL: String): Bitmap? {
-        return try {
-            val barcodeEncoder = BarcodeEncoder()
-            val bitmap =
-                barcodeEncoder.encodeBitmap(URL, BarcodeFormat.QR_CODE, SIZE_QRCODE, SIZE_QRCODE)
-            bitmap
-        } catch (e: Exception) {
-            Log.e("Exception", e.toString())
-            binding.edittextInputURL.error = getString(R.string.error_URL)
-            null
-        }
-    }
-
     companion object {
-        private const val SIZE_QRCODE = 512
         private const val PATTERN = "(?:^|\\s)(#([^\\s]+))[^\\s]?"
     }
 }

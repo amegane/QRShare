@@ -2,9 +2,6 @@ package com.amegane3231.qrshare.ui.fragments
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,23 +19,34 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.FragmentHomeBinding
+import com.amegane3231.qrshare.di.withFactory
 import com.amegane3231.qrshare.recyclerView.HomeRecyclerViewAdapter
 import com.amegane3231.qrshare.viewmodels.HomeViewModel
+import com.amegane3231.qrshare.viewmodels.HomeViewModelFactory
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
+    @Inject
+    lateinit var homeViewModelFactory: HomeViewModelFactory
+
     private lateinit var binding: FragmentHomeBinding
-    private val homeViewModel: HomeViewModel by viewModels()
+
+    private val homeViewModel: HomeViewModel by viewModels { withFactory(homeViewModelFactory) }
+
     private val imageContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK && it.data != null) {
                 val uri = it.data!!.data
 
                 uri?.let {
-                    val bitmap = getBitmap(uri)
+                    val bitmap = homeViewModel.getBitmap(requireContext(), uri)
                     val width = bitmap.width
                     val height = bitmap.height
                     val pixels = IntArray(width * height)
@@ -63,15 +71,27 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+
     private var nowLoading = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val account = GoogleSignIn.getLastSignedInAccount(requireContext())
+        if (account == null) {
+            findNavController().navigate(R.id.action_Home_to_Login)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        homeViewModel.initialize()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
         recyclerViewAdapter.setOnItemClickListener(object :
@@ -83,6 +103,14 @@ class HomeFragment : Fragment() {
             }
         })
 
+        homeViewModel.initialize()
+
+        homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
+            recyclerViewAdapter.add(it)
+            binding.progressBar.isVisible = false
+            nowLoading = false
+        })
+
         binding.viewHome.adapter = recyclerViewAdapter
         binding.viewHome.setHasFixedSize(true)
         binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2).apply {
@@ -91,17 +119,13 @@ class HomeFragment : Fragment() {
         }
         binding.viewHome.addOnScrollListener(InfiniteScrollListener())
 
-        homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
-            recyclerViewAdapter.add(it)
-            binding.progressBar.isVisible = false
-            nowLoading = false
-        })
 
         homeViewModel.listAllPaginated(null)
 
         binding.fabCreateQRCode.setOnClickListener {
             findNavController().navigate(R.id.action_Home_to_Upload)
         }
+
         binding.fabUploadQRCode.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -117,26 +141,6 @@ class HomeFragment : Fragment() {
                 ).show()
             }
         }
-
-        return binding.root
-    }
-
-    private fun getBitmap(uri: Uri): Bitmap {
-        val openFileDescriptor =
-            requireContext().contentResolver.openFileDescriptor(uri, "r")
-        val fileDescriptor = openFileDescriptor?.fileDescriptor
-        val bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor)
-        openFileDescriptor?.close()
-        return bitmap
-    }
-
-    inner class InfiniteScrollListener : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-            if (!recyclerView.canScrollVertically(1)) {
-                load()
-            }
-        }
     }
 
     private fun load() {
@@ -150,6 +154,15 @@ class HomeFragment : Fragment() {
             nowLoading = true
             binding.progressBar.isVisible = true
             homeViewModel.listAllPaginated(null)
+        }
+    }
+
+    inner class InfiniteScrollListener : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            if (!recyclerView.canScrollVertically(1)) {
+                load()
+            }
         }
     }
 

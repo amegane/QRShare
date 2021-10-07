@@ -1,6 +1,5 @@
 package com.amegane3231.qrshare.ui.activities
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -11,15 +10,13 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.ActivityMainBinding
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.gu.toolargetool.TooLargeTool
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
+
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,33 +32,18 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
+        appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.HomeFragment,
+                R.id.LoginFragment
+            )
+        )
         setupActionBarWithNavController(navController, appBarConfiguration)
-
-        val account = GoogleSignIn.getLastSignedInAccount(this)
-        if (account == null) {
-            val intent = Intent(application, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            startActivity(intent)
-            finish()
-        }
-
-        MobileAds.initialize(this) {}
-        val adView = AdView(this)
-        binding.adViewContainer.addView(adView)
-        adView.adSize = AdSize.BANNER
-        adView.adUnitId = AD_UNIT_ID
-        val adRequest = AdRequest.Builder().build()
-        adView.loadAd(adRequest)
     }
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
-    }
-
-    companion object {
-        private const val AD_UNIT_ID = "ca-app-pub-3711976931693295/8814725952"
     }
 }

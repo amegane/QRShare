@@ -17,7 +17,10 @@
         <action
             android:id="@+id/action_Home_to_Detail"
             app:destination="@+id/DetailFragment" />
-
+        <action
+            android:id="@+id/action_Home_to_Login"
+            app:popUpTo="@+id/nav_graph"
+            app:destination="@id/LoginFragment" />
     </fragment>
     <fragment
         android:id="@+id/UploadFragment"
@@ -61,4 +64,14 @@
             app:argType="string" />
     </fragment>
 
+    <fragment
+        android:id="@+id/LoginFragment"
+        android:name="com.amegane3231.qrshare.ui.fragments.LoginFragment"
+        android:label="@string/login_fragment_label"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_Login_to_Home"
+            app:popUpTo="@+id/nav_graph"
+            app:destination="@id/HomeFragment" />
+    </fragment>
 </navigation>

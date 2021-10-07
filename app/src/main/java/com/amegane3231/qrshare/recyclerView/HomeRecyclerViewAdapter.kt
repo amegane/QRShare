@@ -11,10 +11,10 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 
-class HomeRecyclerViewAdapter(
-    private val context: Context
-) : RecyclerView.Adapter<HomeRecyclerViewAdapter.HomeRecyclerViewHolder>() {
+class HomeRecyclerViewAdapter(private val context: Context) :
+    RecyclerView.Adapter<HomeRecyclerViewAdapter.HomeRecyclerViewHolder>() {
     private lateinit var listener: OnItemClickListener
+
     private val storageRefList: MutableList<StorageReference> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeRecyclerViewHolder {
@@ -34,15 +34,6 @@ class HomeRecyclerViewAdapter(
 
     override fun getItemCount(): Int = storageRefList.size
 
-    inner class HomeRecyclerViewHolder(binding: ItemHomeBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        val imageView = binding.image
-    }
-
-    interface OnItemClickListener {
-        fun onClick(view: View, position: Int, path: String, imageName: String)
-    }
-
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.listener = listener
     }
@@ -50,5 +41,14 @@ class HomeRecyclerViewAdapter(
     fun add(list: List<StorageReference>) {
         storageRefList.addAll(list)
         notifyDataSetChanged()
+    }
+
+    inner class HomeRecyclerViewHolder(binding: ItemHomeBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        val imageView = binding.image
+    }
+
+    interface OnItemClickListener {
+        fun onClick(view: View, position: Int, path: String, imageName: String)
     }
 }

@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.amegane3231.qrshare.BuildConfig
 import com.amegane3231.qrshare.R
 import com.amegane3231.qrshare.databinding.FragmentLoginBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -55,7 +56,7 @@ class LoginFragment : Fragment() {
         binding.buttonSignIn.setOnClickListener {
             val googleSignInOptions =
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken(getString(R.string.web_client_id))
+                    .requestIdToken(BuildConfig.WEB_CLIENT_ID)
                     .requestEmail()
                     .build()
             googleSignInClient = GoogleSignIn.getClient(requireActivity(), googleSignInOptions)

@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amegane3231.qrshare.data.QRCode
-import com.amegane3231.qrshare.data.UploadedQRCodeData
 import com.amegane3231.qrshare.usecase.UploadUseCase
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -44,7 +43,7 @@ class UploadViewModel @Inject constructor(private val uploadUseCase: UploadUseCa
                 image?.also {
                     val qrCode = QRCode(it, "$fileName.jpg", url)
                     viewModelScope.launch {
-                        uploadUseCase.uploadQRCode(UploadedQRCodeData(uid, qrCode, hashTags))
+                        uploadUseCase.uploadQRCode(uid, qrCode, hashTags)
                             .collect { task ->
                                 task.addOnFailureListener { exception ->
                                     Log.e("Exception", exception.toString())

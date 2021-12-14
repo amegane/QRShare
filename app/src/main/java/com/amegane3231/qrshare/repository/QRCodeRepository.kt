@@ -4,9 +4,11 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.amegane3231.qrshare.data.EnteredQRCodeData
 import com.amegane3231.qrshare.data.PageTaskResult
-import com.amegane3231.qrshare.data.UploadedQRCodeData
+import com.amegane3231.qrshare.data.QRCode
+import com.amegane3231.qrshare.data.createUploadedQRCodeData
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -24,31 +26,29 @@ class QRCodeRepository @Inject constructor() {
     private val storageRef = storage.reference
     private val listRef = storage.reference.child("QRCode")
 
-    suspend fun upload(fileData: UploadedQRCodeData): UploadTask {
-        createFileId(fileData)
-
-        val qrCodeRef = storageRef.child("QRCode/${fileData.qrCode.name}")
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        fileData.qrCode.image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-        val data = byteArrayOutputStream.toByteArray()
-        return qrCodeRef.putBytes(data)
-    }
-
-    private suspend fun createFileId(fileData: UploadedQRCodeData) {
-        database.collection(fileData.uid)
-            .add(fileData)
+    suspend fun upload(uid: String, qrCode: QRCode, tags: List<String>): UploadTask {
+        val fileData = createUploadedQRCodeData(uid, qrCode, tags)
+        database.collection("QRCode")
+            .document(qrCode.name)
+            .set(fileData)
             .addOnSuccessListener {
-                Log.d("Add document success", it.id)
+                Log.d("Add document success", "Success")
             }
             .addOnFailureListener {
                 Log.w("Add document failure", it)
             }
+
+        val qrCodeRef = storageRef.child("QRCode/${qrCode.name}")
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        qrCode.image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+        val data = byteArrayOutputStream.toByteArray()
+        return qrCodeRef.putBytes(data)
     }
 
     suspend fun getFileData(uid: String, fileName: String): Task<EnteredQRCodeData> {
         val taskCompletionSource = TaskCompletionSource<EnteredQRCodeData>()
 
-        database.collection(uid).whereIn("name", mutableListOf(fileName)).get()
+        database.collection("QRCode").whereIn("name", mutableListOf(fileName)).get()
             .addOnSuccessListener { result ->
                 val data = result.documents[0].data
                 val tags = data?.getValue("tags") as ArrayList<String>

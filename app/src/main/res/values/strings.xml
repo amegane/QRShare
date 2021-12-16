@@ -29,4 +29,5 @@
     <string name="error_hash_tag">ハッシュタグは#から始まる文字列にしてください</string>
     <string name="toast_success_login">ログインに成功しました</string>
     <string name="toast_failure_login">ログインに失敗しました</string>
+    <string name="menu_search">検索</string>
 </resources>

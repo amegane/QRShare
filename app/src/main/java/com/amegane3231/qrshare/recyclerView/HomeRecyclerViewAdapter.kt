@@ -43,6 +43,12 @@ class HomeRecyclerViewAdapter(private val context: Context) :
         notifyDataSetChanged()
     }
 
+    fun replace(list: List<StorageReference>) {
+        storageRefList.clear()
+        storageRefList.addAll(list)
+        notifyDataSetChanged()
+    }
+
     inner class HomeRecyclerViewHolder(binding: ItemHomeBinding) :
         RecyclerView.ViewHolder(binding.root) {
         val imageView = binding.image

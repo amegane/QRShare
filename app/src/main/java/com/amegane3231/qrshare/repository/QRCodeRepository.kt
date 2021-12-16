@@ -13,6 +13,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ListResult
+import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import java.io.ByteArrayOutputStream
@@ -43,6 +44,41 @@ class QRCodeRepository @Inject constructor() {
         qrCode.image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
         val data = byteArrayOutputStream.toByteArray()
         return qrCodeRef.putBytes(data)
+    }
+
+    @ExperimentalStdlibApi
+    suspend fun searchQRCode(query: String): Task<List<StorageReference>> {
+        val taskCompletionSource = TaskCompletionSource<List<StorageReference>>()
+        val hashTagQuery = if (query.startsWith("#")) {
+            query
+        } else {
+            "#$query"
+        }
+
+        database.collection("QRCode")
+            .orderBy("date")
+            .whereArrayContains("tags", hashTagQuery)
+            .get()
+            .addOnSuccessListener { result ->
+                val qrCodeNameList = buildList<String> {
+                    result.documents.forEach {
+                        val data = it.data
+                        add(data?.getValue("name") as String)
+                    }
+                }
+                val qrCodaPathList = buildList<StorageReference> {
+                    qrCodeNameList.forEach { fileName ->
+                        add(listRef.child(fileName))
+                    }
+                }
+                taskCompletionSource.setResult(qrCodaPathList)
+            }
+            .addOnFailureListener {
+                Log.e("Exception", it.toString())
+                taskCompletionSource.setResult(null)
+            }
+
+        return taskCompletionSource.task
     }
 
     suspend fun getFileData(uid: String, fileName: String): Task<EnteredQRCodeData> {

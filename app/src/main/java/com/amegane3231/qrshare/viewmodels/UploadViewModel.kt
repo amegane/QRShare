@@ -43,7 +43,7 @@ class UploadViewModel @Inject constructor(private val uploadUseCase: UploadUseCa
                 image?.also {
                     val qrCode = QRCode(it, "$fileName.jpg", url)
                     viewModelScope.launch {
-                        uploadUseCase.uploadQRCode(uid, qrCode, hashTags)
+                        uploadUseCase.uploadQRCode(uid, qrCode, hashTags, dateTimeFormatter.format(date))
                             .collect { task ->
                                 task.addOnFailureListener { exception ->
                                     Log.e("Exception", exception.toString())

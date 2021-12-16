@@ -143,7 +143,10 @@ class UploadFragment : Fragment() {
 
         lifecycleScope.launch {
             uploadViewModel.uploadState.collect {
-                if (it?.isSuccess == true) {
+                if (it == null) {
+                    return@collect
+                }
+                if (it.isSuccess) {
                     Toast.makeText(
                         requireContext(),
                         getString(R.string.toast_finish_upload),

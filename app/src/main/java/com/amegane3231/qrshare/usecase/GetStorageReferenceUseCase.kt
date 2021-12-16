@@ -4,6 +4,7 @@ import com.amegane3231.qrshare.data.PageTaskResult
 import com.amegane3231.qrshare.repository.QRCodeRepository
 import com.google.android.gms.tasks.Task
 import com.google.firebase.storage.ListResult
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -13,6 +14,15 @@ class GetStorageReferenceUseCase @Inject constructor(private val repository: QRC
         return flow {
             emit(
                 repository.listAllPaginated(listPageTask)
+            )
+        }
+    }
+
+    @ExperimentalStdlibApi
+    suspend fun searchQRCode(query: String): Flow<Task<List<StorageReference>>> {
+        return flow {
+            emit(
+                repository.searchQRCode(query)
             )
         }
     }

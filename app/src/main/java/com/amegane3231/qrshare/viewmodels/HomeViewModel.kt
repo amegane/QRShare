@@ -26,11 +26,11 @@ class HomeViewModel @Inject constructor(
 
     private val listRef = storage.reference.child("QRCode")
 
-    private val _storageList: MutableLiveData<List<StorageReference>> by lazy {
-        MutableLiveData<List<StorageReference>>()
+    private val _storageList: MutableLiveData<MutableList<StorageReference>> by lazy {
+        MutableLiveData<MutableList<StorageReference>>()
     }
 
-    val storageList: LiveData<List<StorageReference>> get() = _storageList
+    val storageList: MutableLiveData<MutableList<StorageReference>> get() = _storageList
 
     private val _searchedQRCodePathList: MutableLiveData<List<StorageReference>> by lazy {
         MutableLiveData<List<StorageReference>>()
@@ -43,12 +43,13 @@ class HomeViewModel @Inject constructor(
     private var isTokenNullable = true
 
     init {
-        _storageList.value = listOf()
+        _storageList.value = mutableListOf()
     }
 
     fun initialize() {
+        pageToken = null
         isTokenNullable = true
-        _storageList.value = listOf()
+        _storageList.value = mutableListOf()
     }
 
     fun listAllPaginated(pageToken: String?) {
@@ -68,7 +69,8 @@ class HomeViewModel @Inject constructor(
                 task.addOnSuccessListener {
                     this@HomeViewModel.pageToken = it.pageToken
                     Log.d("pageToken", pageToken.toString())
-                    _storageList.postValue(it.items)
+                    _storageList.value?.addAll(it.items)
+                    _storageList.postValue(_storageList.value)
                 }.addOnFailureListener {
                     Log.e("Exception", it.toString())
                 }

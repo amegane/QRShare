@@ -39,6 +39,8 @@ class HomeFragment : Fragment() {
 
     private val homeViewModel: HomeViewModel by viewModels { withFactory(homeViewModelFactory) }
 
+    private lateinit var adapter: HomeRecyclerViewAdapter
+
     private val imageContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK && it.data != null) {
@@ -73,6 +75,8 @@ class HomeFragment : Fragment() {
 
     private var nowLoading = false
 
+    private var isSearched = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val account = GoogleSignIn.getLastSignedInAccount(requireContext())
@@ -94,8 +98,8 @@ class HomeFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
-        val recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
-        recyclerViewAdapter.setOnItemClickListener(object :
+        adapter = HomeRecyclerViewAdapter(requireContext())
+        adapter.setOnItemClickListener(object :
             HomeRecyclerViewAdapter.OnItemClickListener {
             override fun onClick(view: View, position: Int, path: String, imageName: String) {
                 val imageUid = imageName.dropLast(COUNT_TO_DELETE_DATE_AND_FILE_EXTENSION)
@@ -107,17 +111,17 @@ class HomeFragment : Fragment() {
         homeViewModel.initialize()
 
         homeViewModel.storageList.observe(viewLifecycleOwner, Observer {
-            recyclerViewAdapter.add(it)
+            adapter.replace(it)
             binding.progressBar.isVisible = false
             nowLoading = false
         })
 
         homeViewModel.searchedQRCodePathList.observe(viewLifecycleOwner, Observer {
             if (it == null) return@Observer
-            recyclerViewAdapter.replace(it)
+            adapter.replace(it)
         })
 
-        binding.viewHome.adapter = recyclerViewAdapter
+        binding.viewHome.adapter = adapter
         binding.viewHome.setHasFixedSize(true)
         binding.viewHome.layoutManager = GridLayoutManager(requireContext(), 2).apply {
             orientation = GridLayoutManager.VERTICAL
@@ -154,6 +158,7 @@ class HomeFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_home, menu)
         setSearchView(menu)
+        setViewAfterSearch(menu)
     }
 
     @ExperimentalStdlibApi
@@ -165,10 +170,29 @@ class HomeFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query.isNullOrBlank()) return true
                 homeViewModel.searchQRCode(query)
+                isSearched = true
                 return false
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
+                return true
+            }
+        })
+    }
+
+    private fun setViewAfterSearch(menu: Menu) {
+        val searchItem = menu.findItem(R.id.action_search)
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                if (isSearched) {
+                    isSearched = false
+                    Log.d("NUMBER", homeViewModel.storageList.value?.size?.toString() ?: "-2")
+                    adapter.replace(homeViewModel.storageList.value ?: listOf())
+                }
+                return true
+            }
+
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 return true
             }
         })

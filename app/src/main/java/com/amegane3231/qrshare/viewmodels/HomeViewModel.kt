@@ -32,6 +32,12 @@ class HomeViewModel @Inject constructor(
 
     val storageList: LiveData<List<StorageReference>> get() = _storageList
 
+    private val _searchedQRCodePathList: MutableLiveData<List<StorageReference>> by lazy {
+        MutableLiveData<List<StorageReference>>()
+    }
+
+    val searchedQRCodePathList: LiveData<List<StorageReference>> get() = _searchedQRCodePathList
+
     private var pageToken: String? = null
 
     private var isTokenNullable = true
@@ -63,6 +69,19 @@ class HomeViewModel @Inject constructor(
                     this@HomeViewModel.pageToken = it.pageToken
                     Log.d("pageToken", pageToken.toString())
                     _storageList.postValue(it.items)
+                }.addOnFailureListener {
+                    Log.e("Exception", it.toString())
+                }
+            }
+        }
+    }
+
+    @ExperimentalStdlibApi
+    fun searchQRCode(query: String) {
+        viewModelScope.launch {
+            getStorageReferenceUseCase.searchQRCode(query).collect { task ->
+                task.addOnSuccessListener {
+                    _searchedQRCodePathList.postValue(it)
                 }.addOnFailureListener {
                     Log.e("Exception", it.toString())
                 }

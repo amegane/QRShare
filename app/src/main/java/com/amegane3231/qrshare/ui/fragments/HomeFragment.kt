@@ -4,11 +4,10 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -93,6 +92,8 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setHasOptionsMenu(true)
+
         val recyclerViewAdapter = HomeRecyclerViewAdapter(requireContext())
         recyclerViewAdapter.setOnItemClickListener(object :
             HomeRecyclerViewAdapter.OnItemClickListener {
@@ -109,6 +110,11 @@ class HomeFragment : Fragment() {
             recyclerViewAdapter.add(it)
             binding.progressBar.isVisible = false
             nowLoading = false
+        })
+
+        homeViewModel.searchedQRCodePathList.observe(viewLifecycleOwner, Observer {
+            if (it == null) return@Observer
+            recyclerViewAdapter.replace(it)
         })
 
         binding.viewHome.adapter = recyclerViewAdapter
@@ -141,6 +147,31 @@ class HomeFragment : Fragment() {
                 ).show()
             }
         }
+    }
+
+    @ExperimentalStdlibApi
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_home, menu)
+        setSearchView(menu)
+    }
+
+    @ExperimentalStdlibApi
+    private fun setSearchView(menu: Menu) {
+        val searchView = menu.findItem(R.id.action_search).actionView as SearchView
+        searchView.setIconifiedByDefault(false)
+        searchView.queryHint = getString(R.string.menu_search)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (query.isNullOrBlank()) return true
+                homeViewModel.searchQRCode(query)
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return true
+            }
+        })
     }
 
     private fun load() {

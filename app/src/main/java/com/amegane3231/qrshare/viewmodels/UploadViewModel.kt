@@ -44,21 +44,27 @@ class UploadViewModel @Inject constructor(private val uploadUseCase: UploadUseCa
                 image?.also {
                     val qrCode = QRCode(it, "$fileName.jpg", url)
                     viewModelScope.launch {
-                        uploadUseCase.uploadQRCode(UploadedQRCodeData(uid, qrCode, hashTags))
-                            .collect { task ->
-                                task.addOnFailureListener { exception ->
-                                    Log.e("Exception", exception.toString())
-                                    Log.v("Success", "Upload Finished")
-                                    viewModelScope.launch {
-                                        _uploadState.emit(Result.failure(exception))
-                                    }
-                                }.addOnSuccessListener {
-                                    Log.v("Success", "Upload Finished")
-                                    viewModelScope.launch {
-                                        _uploadState.emit(Result.success(1))
-                                    }
+                        uploadUseCase.uploadQRCode(
+                            UploadedQRCodeData(
+                                uid,
+                                qrCode,
+                                hashTags,
+                                dateTimeFormatter.format(date)
+                            )
+                        ).collect { task ->
+                            task.addOnFailureListener { exception ->
+                                Log.e("Exception", exception.toString())
+                                Log.v("Success", "Upload Finished")
+                                viewModelScope.launch {
+                                    _uploadState.emit(Result.failure(exception))
+                                }
+                            }.addOnSuccessListener {
+                                Log.v("Success", "Upload Finished")
+                                viewModelScope.launch {
+                                    _uploadState.emit(Result.success(1))
                                 }
                             }
+                        }
                     }
                 }
 

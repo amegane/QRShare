@@ -83,9 +83,11 @@ class QRCodeRepository @Inject constructor() {
     suspend fun getFileData(uid: String, fileName: String): Task<EnteredQRCodeData> {
         val taskCompletionSource = TaskCompletionSource<EnteredQRCodeData>()
 
-        database.collection("QRCode").whereIn("name", mutableListOf(fileName)).get()
+        database.collection("QRCode")
+            .document(fileName)
+            .get()
             .addOnSuccessListener { result ->
-                val data = result.documents[0].data
+                val data = result.data
                 val tags = data?.getValue("tags") as ArrayList<String>
                 val url = data.getValue("url") as String
                 taskCompletionSource.setResult(EnteredQRCodeData(tags, url))

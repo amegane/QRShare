@@ -8,10 +8,15 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class UploadUseCase @Inject constructor(private val repository: QRCodeRepository) {
-    suspend fun uploadQRCode(uid: String, qrCode: QRCode, tags: List<String>): Flow<UploadTask> {
+    suspend fun uploadQRCode(
+        uid: String,
+        qrCode: QRCode,
+        tags: List<String>,
+        date: String
+    ): Flow<UploadTask> {
         return flow {
             emit(
-                repository.upload(uid, qrCode, tags)
+                repository.upload(uid, qrCode, tags, date)
             )
         }
     }

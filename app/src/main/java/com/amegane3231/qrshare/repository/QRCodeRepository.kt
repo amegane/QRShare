@@ -8,7 +8,6 @@ import com.amegane3231.qrshare.data.QRCode
 import com.amegane3231.qrshare.data.createUploadedQRCodeData
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
-import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -27,8 +26,8 @@ class QRCodeRepository @Inject constructor() {
     private val storageRef = storage.reference
     private val listRef = storage.reference.child("QRCode")
 
-    suspend fun upload(uid: String, qrCode: QRCode, tags: List<String>): UploadTask {
-        val fileData = createUploadedQRCodeData(uid, qrCode, tags)
+    suspend fun upload(uid: String, qrCode: QRCode, tags: List<String>, date: String): UploadTask {
+        val fileData = createUploadedQRCodeData(uid, qrCode, tags, date)
         database.collection("QRCode")
             .document(qrCode.name)
             .set(fileData)
